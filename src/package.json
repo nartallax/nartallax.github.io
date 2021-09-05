@@ -1,0 +1,29 @@
+{
+  "name": "nartallax.github.io",
+  "version": "1.0.0",
+  "description": "Nartallax's personal website",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nartallax/nartallax.github.io.git"
+  },
+  "author": "Nartallax",
+  "license": "0BSD",
+  "bugs": {
+    "url": "https://github.com/nartallax/nartallax.github.io/issues"
+  },
+  "homepage": "https://github.com/nartallax/nartallax.github.io#readme",
+  "devDependencies": {
+    "@nartallax/imploder": "^1.1.5",
+    "@nartallax/koramund": "^2.0.2",
+    "@nartallax/lithograph": "^1.0.2",
+    "@typescript-eslint/eslint-plugin": "^4.30.0",
+    "@typescript-eslint/parser": "^4.30.0",
+    "eslint": "^7.32.0",
+    "tsc": "^2.0.3",
+    "typescript": "^4.4.2"
+  }
+}
