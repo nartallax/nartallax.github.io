@@ -1,0 +1,6 @@
+User-Agent: *
+Disallow: /src/*
+Disallow: /nartallax.github.io.code-workspace
+
+Sitemap: https://nartallax.github.io/sitemap.xml
+Host: https://nartallax.github.io

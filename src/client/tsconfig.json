@@ -15,7 +15,7 @@
             "development": {
                 "target": "es2018",
                 "watchMode": true,
-                "httpPort": 45553
+                "httpPort": 6343
             }
         }
     },
