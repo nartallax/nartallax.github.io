@@ -1,16 +1,24 @@
 { 
-    "exclude": [
-        "./test_project/*"
+    "include": [
+        "./**/*",
+        "../common/**/*"
     ],
 
     "imploderConfig": {
-        "target": "es2018",
-        "entryModule": "server_entrypoint.ts",
+        "target": "es5",
+        "entryModule": "star_travel.ts",
         "entryFunction": "main",
         "outFile": "js/bundle.js",
         "profiles": {
+            "release": {
+                "target": "es5",
+                "minify": true
+            },
             "development": {
-                "watchMode": true
+                "target": "es2018",
+                "watchMode": true,
+                "lazyStart": true,
+                "httpPort": 6345
             }
         }
     },
@@ -22,10 +30,11 @@
             "es2018"
         ],
 
-        "baseUrl": "./",
+        "rootDir": "..",
+        "baseUrl": "../",
         "paths": {
-            "*": [
-                "./*"
+            "common/*": [
+                "./common/*"
             ]
         },
 

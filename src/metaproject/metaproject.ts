@@ -1,4 +1,6 @@
 import {Koramund} from "@nartallax/koramund";
+import {promises as Fs} from "fs";
+import * as Path from "path";
 
 export async function main(): Promise<void> {
 	let controller = Koramund.create({
@@ -7,7 +9,7 @@ export async function main(): Promise<void> {
 
 	let server: Koramund.ImploderProject & Koramund.HttpProxifyableProject = controller.addProject({
 		name: "Server",
-		imploderTsconfigPath: "server/tsconfig.json",
+		imploderTsconfigPath: "website/server/tsconfig.json",
 		imploderProfile: "development",
 		getLaunchCommand: () => [controller.nodePath, server.getImploder().config.outFile],
 		proxyHttpPort: 6342
@@ -29,10 +31,26 @@ export async function main(): Promise<void> {
 
 	let client = controller.addProject({
 		name: "Client",
-		imploderTsconfigPath: "client/tsconfig.json",
+		imploderTsconfigPath: "website/client/tsconfig.json",
 		imploderProfile: "development"
 	});
 
-	await client.build(); // starting the Imploder
-	await server.start();
+	let clientsideProjects = [client] as Koramund.ImploderProject[];
+	for(let sketchName of (await Fs.readdir("sketches"))){
+		if(sketchName === "common"){
+			continue;
+		}
+		let sketch = controller.addProject({
+			name: sketchName,
+			imploderTsconfigPath: Path.join("sketches", sketchName, "tsconfig.json"),
+			imploderProfile: "development"
+		});
+
+		clientsideProjects.push(sketch);
+	}
+
+	await Promise.all<unknown>([
+		server.start(),
+		...clientsideProjects.map(proj => proj.getOrStartImploder())
+	]);
 }

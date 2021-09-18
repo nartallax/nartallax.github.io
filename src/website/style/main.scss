@@ -1,0 +1,56 @@
+@use "vars";
+@use "sketch_card";
+
+body {
+	@extend .default-font;
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background: vars.$very-dark;
+	padding: 0;
+	margin: 0;
+	border: 0;
+}
+
+h1 {
+	font-size: 2rem;
+}
+
+h2 {
+	font-size: 1.5rem;
+}
+
+.sorting-selection {
+
+	font-size: 1rem;
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	justify-content: flex-start;
+	align-items: center;
+
+	select {
+		margin: 0 0.5em;
+	}
+
+}
+
+select {
+	@extend .default-font;
+	@extend .default-container-look;
+
+	option {
+		@extend .default-font;
+		background: vars.$dark;
+	}
+}
+
+.sketch-container {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	justify-content: flex-start;
+	align-items: center;
+}

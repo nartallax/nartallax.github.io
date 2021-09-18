@@ -1,21 +1,19 @@
-{ 
-    "exclude": [
-        "./test_project/*"
+{
+
+    "include": [
+        "./**/*",
+        "../common/**/*"
     ],
 
     "imploderConfig": {
-        "entryModule": "client_entrypoint.ts",
+        "target": "es2018",
+        "entryModule": "server_entrypoint.ts",
         "entryFunction": "main",
-        "outFile": "js/bundle.js",
+        "outFile": "js/server.js",
+        "moduleBlacklistRegexp": ["^/client/.*?$"],
         "profiles": {
-            "release": {
-                "target": "es5",
-                "minify": true
-            },
             "development": {
-                "target": "es2018",
-                "watchMode": true,
-                "httpPort": 6343
+                "watchMode": true
             }
         }
     },
@@ -27,10 +25,12 @@
             "es2018"
         ],
 
-        "baseUrl": "./",
+        "rootDir": "..",
+        "baseUrl": "../",
         "paths": {
             "*": [
-                "./*"
+                "./server/*",
+                "./common/*"
             ]
         },
 
