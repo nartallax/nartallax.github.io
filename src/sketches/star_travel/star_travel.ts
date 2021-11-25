@@ -2,14 +2,14 @@ import {raf} from "common/animation_utils";
 import {addCssToPage} from "common/css_utils";
 import {Queue} from "common/queue";
 import {svgTag} from "common/svg_utils";
+import {generateRandomNebula} from "star_travel/nebula_generator";
 
 export function main(): void {
 	let controller = new StarTravelController({
 		colors: ["#ddd", "#B2BBFF", "#9EA6FF", "#A3E4FF", "#8CC7FF", "#B596FF"],
 		count: 250,
 		travelTime: 2500,
-		travelTimeDeviation: 0.2,
-		backgroundRotationCenterDistance: 20000
+		travelTimeDeviation: 0.2
 	});
 	document.body.style.overflow = "hidden";
 	document.body.appendChild(controller.root);
@@ -21,7 +21,6 @@ interface StarTravelOpts {
 	count: number;
 	travelTime: number;
 	travelTimeDeviation: number;
-	backgroundRotationCenterDistance: number; // расстояние от центра экрана до центра диска, на котором расположен бекграунд
 }
 
 interface Star {
@@ -29,8 +28,6 @@ interface Star {
 	el: SVGElement;
 }
 
-const bgHeight = 6016;
-const bgWidth = 4000;
 
 class StarTravelController {
 
@@ -60,17 +57,8 @@ class StarTravelController {
 	}
 
 	private makeCss(): void {
-		let bgScale = this.backgroundScale;
 		addCssToPage("star_travel", `
-			@keyframes startravel-rotate-bg {
-				from { 
-					transform: translate(50%, 50%) rotate(0deg) scale(0.75) translate(${-(bgWidth * bgScale) / 2}px, ${-(bgHeight * bgScale) / 2}px);
-				}
-				to { 
-					transform: translate(50%, 50%) rotate(360deg) scale(1) translate(${-(bgWidth * bgScale) / 2}px, ${-(bgHeight * bgScale) / 2}px);
-				}
-			}
-
+			
 			@keyframes startravel-starfly {
 				0% { 
 					transform: scale(0.1) translate(0, 0);
@@ -84,12 +72,6 @@ class StarTravelController {
 					transform: scale(5) translate(100%, 0);
 					opacity: 1;
 				}
-			}
-
-			.startravel-background {
-				opacity: 0.6;
-
-				animation: startravel-rotate-bg 1000s linear infinite;
 			}
 
 			.startravel-svg {
@@ -176,21 +158,16 @@ class StarTravelController {
 		});
 	}
 
-	private get backgroundScale(): number {
-		let maxScreenRadius = Math.sqrt(Math.pow(this.width, 2) + Math.pow(this.height, 2))
-		let minImgRadius = Math.min(bgWidth, bgHeight) / 2;
-		let scale = maxScreenRadius / minImgRadius;
-		return scale;
-	}
-
-	private generateBackground(): SVGGraphicsElement {
-		let scale = this.backgroundScale;
-		return svgTag("image", {
-			class: "startravel-background",
-			href: "/img/sketch/star_travel/bg.jpg",
-			height: bgHeight * scale,
-			width: bgWidth * scale
-		})
+	private generateBackground(): SVGElement {
+		let nebulae = [] as SVGElement[];
+		for(let i = 0; i < 2; i++){
+			let nebula = generateRandomNebula();
+			nebulae.push(nebula);
+			let dx = (Math.random() - 0.5) * (this.width / 3);
+			let dy = (Math.random() - 0.5) * (this.height / 3);
+			nebula.setAttribute("transform", `translate(${(this.width / 2) + dx}, ${(this.height / 2) + dy})`);
+		}
+		return svgTag("g", {children: nebulae});
 	}
 
 }

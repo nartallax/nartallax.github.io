@@ -5,4 +5,11 @@ cd `dirname "$0"`
 cd ..
 
 ./node_modules/.bin/imploder --tsconfig metaproject/tsconfig.json
-node metaproject/js/bundle.js
+
+WHYNODERUNNINGIMPORT="global.whyIsNodeRunning = require('why-is-node-running');"
+BUNDLE_FILE="metaproject/js/bundle.js"
+
+# just for debugging purposes
+#echo "$WHYNODERUNNINGIMPORT" | cat - "$BUNDLE_FILE" > /tmp/out && mv /tmp/out "$BUNDLE_FILE"
+
+node "$BUNDLE_FILE"

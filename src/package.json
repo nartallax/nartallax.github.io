@@ -17,8 +17,8 @@
   },
   "homepage": "https://github.com/nartallax/nartallax.github.io#readme",
   "devDependencies": {
-    "@nartallax/imploder": "^1.1.6",
-    "@nartallax/koramund": "^2.0.3",
+    "@nartallax/imploder": "^1.1.12",
+    "@nartallax/koramund": "^2.0.4",
     "@nartallax/lithograph": "^1.1.5",
     "@typescript-eslint/eslint-plugin": "^4.30.0",
     "@typescript-eslint/parser": "^4.30.0",

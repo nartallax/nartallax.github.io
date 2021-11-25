@@ -4,7 +4,7 @@ import * as Path from "path";
 
 export async function main(): Promise<void> {
 	let controller = Koramund.create({
-		log: opts => console.error(`${opts.timeStr} | ${opts.paddedProjectName} | ${opts.message}`)
+		log: opts => console.error(`\r${opts.timeStr} | ${opts.paddedProjectName} | ${opts.message}`)
 	});
 
 	let server: Koramund.ImploderProject & Koramund.HttpProxifyableProject = controller.addProject({

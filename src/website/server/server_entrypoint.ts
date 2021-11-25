@@ -2,6 +2,7 @@ import {defaultLangKey, languageKeys} from "consts";
 import {contentSet} from "content_set";
 import {MainPage} from "pages/main_page";
 import {sketches} from "sketches";
+import {TranslatedString} from "types";
 import {PageBase} from "widgets/specific/page_base";
 
 let _isReleasing: boolean | null = null;
@@ -35,14 +36,22 @@ function makeResources(): void {
 	})
 }
 
+function langPrefixedUrl(langKey: keyof TranslatedString, url: string): string {
+	return (langKey === defaultLangKey? "": "/" + langKey) + url;
+}
+
 function makePages(): void {
-	contentSet.addStaticPage({
-		urlPath: "/",
-		render: () => PageBase({
-			title: "Nartallax's website",
-			description: "It's my personal website. Here are some of my creations, experiments and more."
-		}, MainPage())
-	});
+
+	languageKeys.forEach(langKey => {
+		contentSet.addStaticPage({
+			urlPath: langPrefixedUrl(langKey, "/"),
+			params: {lang: langKey},
+			render: () => PageBase({
+				title: "Nartallax's website",
+				description: "It's my personal website. Here are some of my creations, experiments and more."
+			}, MainPage())
+		});
+	})
 
 	contentSet.addPlaintextPage({
 		urlPath: "/robots.txt",
@@ -58,10 +67,9 @@ Host: ${context.options.preferredProtocol}://${context.options.domain}
 
 	(Object.keys(sketches) as (keyof(typeof sketches))[]).forEach(sketchName => {
 		languageKeys.forEach(langKey => {	
-			let langPrefix = langKey === defaultLangKey? "": ("/" + langKey);
 			let sketch = sketches[sketchName];
 			contentSet.addStaticPage({
-				urlPath: `${langPrefix}/sketch/${sketchName}`,
+				urlPath: langPrefixedUrl(langKey, `/sketch/${sketchName}`),
 				params: {lang: langKey},
 				render: () => PageBase({
 					title: sketch.name[langKey],
