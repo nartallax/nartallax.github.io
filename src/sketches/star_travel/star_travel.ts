@@ -7,7 +7,7 @@ import {generateRandomNebula} from "star_travel/nebula_generator";
 export function main(): void {
 	let controller = new StarTravelController({
 		colors: ["#ddd", "#B2BBFF", "#9EA6FF", "#A3E4FF", "#8CC7FF", "#B596FF"],
-		count: 250,
+		count: 100,
 		travelTime: 2500,
 		travelTimeDeviation: 0.2
 	});
@@ -74,6 +74,15 @@ class StarTravelController {
 				}
 			}
 
+			@keyframes startravel-rotate-bg {
+				from { 
+					transform: translate(50%, 50%) rotate(0deg) translate(-50%, -50%);
+				}
+				to { 
+					transform: translate(50%, 50%) rotate(360deg) translate(-50%, -50%);
+				}
+			}
+
 			.startravel-svg {
 				position: relative;
 				background: #000;
@@ -88,6 +97,10 @@ class StarTravelController {
 
 			.startravel-star circle {
 				filter: brightness(200%);
+			}
+
+			.startravel-background {
+				animation: startravel-rotate-bg 250s linear infinite;
 			}
 		`)
 	}
@@ -153,6 +166,7 @@ class StarTravelController {
 				this.init();
 				return;
 			}
+			//void this.removeOldStars, void this.addNewStars
 			this.removeOldStars();
 			this.addNewStars();
 		});
@@ -167,7 +181,7 @@ class StarTravelController {
 			let dy = (Math.random() - 0.5) * (this.height / 3);
 			nebula.setAttribute("transform", `translate(${(this.width / 2) + dx}, ${(this.height / 2) + dy})`);
 		}
-		return svgTag("g", {children: nebulae});
+		return svgTag("g", {children: nebulae, class: "startravel-background"});
 	}
 
 }
