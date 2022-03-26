@@ -35,6 +35,13 @@ const _tags = {
 			ru: "Использование технологии SVG.",
 			en: "Usage of SVG."
 		}
+	},
+	evolution: {
+		name: { ru: "Эволюция", en: "Evolution" },
+		description: {
+			ru: "Демонстрация эволюции.",
+			en: "Demonstration of evolution."
+		}
 	}
 }
 

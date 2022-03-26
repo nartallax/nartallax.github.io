@@ -26,6 +26,7 @@ function makeResources(): void {
 
 	contentSet.setImageDirectory("img");
 	contentSet.setWebpDirectory("webp");
+	contentSet.addExternalJsDirectory("js");
 
 	(Object.keys(sketches) as (keyof(typeof sketches) & string)[]).forEach(sketchName => {
 		contentSet.addImploderProject(

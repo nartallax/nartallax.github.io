@@ -1,11 +1,12 @@
 { 
-    "exclude": [
-        "./test_project/*"
+    "include": [
+        "./**/*",
+        "../common/**/*"
     ],
 
     "imploderConfig": {
         "target": "es5",
-        "entryModule": "ceiling_pendulum.ts",
+        "entryModule": "squaremix_3d.ts",
         "entryFunction": "main",
         "outFile": "js/bundle.js",
         "profiles": {
@@ -17,7 +18,7 @@
                 "target": "es2018",
                 "watchMode": true,
                 "lazyStart": true,
-                "httpPort": 6344
+                "httpPort": 6346
             }
         }
     },
@@ -29,10 +30,11 @@
             "es2018"
         ],
 
-        "baseUrl": "./",
+        "rootDir": "..",
+        "baseUrl": "../",
         "paths": {
-            "*": [
-                "./*"
+            "common/*": [
+                "./common/*"
             ]
         },
 

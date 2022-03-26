@@ -2,21 +2,18 @@ import {tags} from "tags";
 import {SketchDescription} from "types";
 
 const _sketches = {
-	/*
-	ceiling_pendulum: {
-		name: { ru: "Потолочный маятник", en: "Ceiling pendulum" },
+	squaremix_3d: {
+		name: { ru: "Квадратный замес", en: "Square mix" },
 		description: {
-			ru: "Маятник, подвешенный на потолке. Можно придавать ускорение и смотреть на то, какой след он за собой оставляет.",
-			en: "A pendulum fixed on a ceiling. Can be manually accelerated to leave a trail."
+			ru: "Анимация на основе картинки, перемешивающая её части",
+			en: "Static image based animation that mixes it up"
 		},
 		inspiration: [{
-			description: { ru: "Маятник с песком", en: "The Sand Pendulum" },
-			url: "https://www.youtube.com/watch?v=7f16hAs1FB4"
+			description: { ru: "Видео без явного источника", en: "Some video without clear source" }
 		}],
-		date: new Date(2020, 0, 1),
-		tags: [tags.simulation, tags.svg]
+		date: new Date(2022, 2, 25),
+		tags: [tags.art]
 	},
-	*/
 	star_travel: {
 		name: { ru: "Навстречу звездам", en: "Star travel" },
 		description: {
@@ -26,10 +23,6 @@ const _sketches = {
 		inspiration: [{
 			description: { ru: "Старый скринсейвер Windows", en: "Old Windows screensaver" },
 			url: "https://www.youtube.com/watch?v=teFHZRpH5Pw"
-		}],
-		usedContent: [{
-			description: { ru: "Фото космоса для фона - Max McKinnon", en: "Background space photo - Max McKinnon" },
-			url: "https://unsplash.com/photos/c9OCWLka764"
 		}],
 		date: new Date(2021, 8, 18),
 		tags: [tags.art, tags.svg, tags.css]
