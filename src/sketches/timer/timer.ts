@@ -1,5 +1,6 @@
 import {addCssToPage} from "common/css_utils"
 import {tag} from "common/dom_utils"
+import {makeSketchInfoButton} from "common/sketch_info_button"
 
 function doCss(): void {
 	addCssToPage("timer", `
@@ -31,7 +32,8 @@ body {
 	font-family: 'courier new';
 }
 
-input {
+.speed-input, 
+.reset-button {
 	font-size: 2rem;
 	color: #aaa;
 	border: 2px solid #aaa;
@@ -41,7 +43,8 @@ input {
 	border-radius: 3px;
 }
 
-input:hover {
+.speed-input:hover, 
+.reset-button:hover {
 	color: #fff;
 	border-color: #fff;
 	background: #888;
@@ -52,7 +55,7 @@ input:hover {
 	font-size: 2rem;
 }
 
-input[type="number"]{
+.speed-input {
 	max-width: 5em;
 }
 
@@ -81,12 +84,12 @@ export function main(): void {
 	let timeEl = tag({class: "timer"})
 	wrap.appendChild(timeEl)
 
-	let resetBtn = tag({tagName: "input", type: "button", value: "reset"})
+	let resetBtn = tag({tagName: "input", type: "button", value: "reset", class: "reset-button"})
 	resetBtn.addEventListener("click", () => timeAcc = 0)
 	wrap.appendChild(resetBtn)
 
 	let speedBlock = tag({class: "speed-block", text: "Speed: "})
-	let speedInput = tag({tagName: "input", type: "number", value: 1})
+	let speedInput = tag({tagName: "input", type: "number", value: 1, class: "speed-input"})
 	let speed = 1
 	let updateSpeed = () => {
 		let parsed = parseFloat(speedInput.value)
@@ -117,4 +120,6 @@ export function main(): void {
 		timeEl.textContent = formatTime(Math.round(timeAcc))
 	}
 	updateTimer()
+
+	makeSketchInfoButton()
 }

@@ -59,6 +59,13 @@ const _tags = {
 			en: "Visual composition that uses THREE.js to render."
 		}
 	},
+	tool: {
+		name: {ru: "Инструмент", en: "Tool"},
+		description: {
+			ru: "Штука, помогающая достичь каких-либо простых целей.",
+			en: "A thing that helps achieving some simple goals."
+		}
+	},
 	css: {
 		name: {ru: "CSS", en: "CSS"},
 		description: {

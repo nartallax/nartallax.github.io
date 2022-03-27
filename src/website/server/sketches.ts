@@ -2,7 +2,6 @@ import {tags, SketchDescription} from "website_common"
 
 const _sketches = {
 	timer: {
-		hidden: true,
 		name: {ru: "Таймер", en: "Timer"},
 		description: {
 			ru: "Счетчик времени с настройками",
@@ -12,7 +11,7 @@ const _sketches = {
 			description: {ru: "Вопрос в чате", en: "A question from chat"}
 		}],
 		date: new Date(2022, 2, 27),
-		tags: []
+		tags: [tags.tool]
 	},
 	squaremix_3d: {
 		name: {ru: "Квадратный микс", en: "Square mix"},
