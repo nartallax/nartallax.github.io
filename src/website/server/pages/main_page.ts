@@ -1,9 +1,9 @@
-import {sketches} from "sketches";
-import {Div} from "widgets/generic/div";
-import {SketchCard} from "widgets/specific/sketch_card";
+import {sketches} from "sketches"
+import {Div} from "widgets/generic/div"
+import {SketchCard} from "widgets/specific/sketch_card"
 
 export function MainPage(): string {
-	
+
 	return [
 		/*
 		Div({class: "sorting-selection"}, [
@@ -39,7 +39,12 @@ export function MainPage(): string {
 		HrTag(),
 		*/
 		Div({class: "sketch-container"}, [
-			...(Object.keys(sketches) as (keyof(typeof sketches))[]).map(sketchName => SketchCard({sketchName}))
+			...(Object.keys(sketches) as (keyof(typeof sketches))[]).map(sketchName => {
+				if(sketches[sketchName].hidden){
+					return null
+				}
+				return SketchCard({sketchName})
+			})
 		])
 	].join("\n")
 

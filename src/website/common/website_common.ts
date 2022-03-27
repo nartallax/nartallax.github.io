@@ -20,6 +20,7 @@ export interface SketchDescription {
 	date: Date
 	inspiration?: ContentReference[]
 	usedContent?: ContentReference[]
+	hidden?: boolean
 }
 
 export interface TagDescription {

@@ -67,11 +67,12 @@ Host: ${context.options.preferredProtocol}://${context.options.domain}
 	});
 
 	(Object.keys(sketches) as (keyof(typeof sketches))[]).forEach(sketchName => {
+		let sketch = sketches[sketchName]
 		languageKeys.forEach(langKey => {
-			let sketch = sketches[sketchName]
 
-			let descrObj: {[k in keyof SketchDescription]: unknown} = {...sketches[sketchName]}
-			descrObj.date = sketches[sketchName].date.getTime()
+
+			let descrObj: {[k in keyof SketchDescription]: unknown} = {...sketch}
+			descrObj.date = sketch.date.getTime()
 
 			contentSet.addStaticPage({
 				urlPath: langPrefixedUrl(langKey, `/sketch/${sketchName}`),
