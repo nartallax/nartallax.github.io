@@ -13,16 +13,16 @@ function isReleasing(): boolean {
 function makeResources(): void {
 	contentSet.addImploderProject(
 		"/js/main.js",
-		"src/website/client/tsconfig.json",
+		"../src/website/client/tsconfig.json",
 		isReleasing() ? "release" : "development"
 	)
 
 	contentSet.addSassItem(
 		"/css/main.css",
-		"src/website/style/main.scss"
+		"../src/website/style/main.scss"
 	)
 
-	contentSet.addSassSource("src/website/style/main.scss")
+	contentSet.addSassSource("../src/website/style/main.scss")
 
 	contentSet.setImageDirectory("img")
 	contentSet.setWebpDirectory("webp")
@@ -31,7 +31,7 @@ function makeResources(): void {
 	(Object.keys(sketches) as (keyof(typeof sketches) & string)[]).forEach(sketchName => {
 		contentSet.addImploderProject(
 			"/js/sketch/" + sketchName + ".js",
-			"src/sketches/" + sketchName + "/tsconfig.json",
+			"../src/sketches/" + sketchName + "/tsconfig.json",
 			isReleasing() ? "release" : "development"
 		)
 	})
@@ -49,7 +49,8 @@ function makePages(): void {
 			params: {lang: langKey},
 			render: () => PageBase({
 				title: "Nartallax's website",
-				description: "It's my personal website. Here are some of my creations, experiments and more."
+				description: "It's my personal website. Here are some of my creations, experiments and more.",
+				lang: langKey
 			}, MainPage())
 		})
 	})
@@ -58,8 +59,6 @@ function makePages(): void {
 		urlPath: "/robots.txt",
 		render: context =>
 			`User-Agent: *
-Disallow: /src/*
-Disallow: /nartallax.github.io.code-workspace
 
 Sitemap: ${context.options.preferredProtocol}://${context.options.domain}/sitemap.xml
 Host: ${context.options.preferredProtocol}://${context.options.domain}
@@ -78,6 +77,7 @@ Host: ${context.options.preferredProtocol}://${context.options.domain}
 				urlPath: langPrefixedUrl(langKey, `/sketch/${sketchName}`),
 				params: {lang: langKey},
 				render: () => PageBase({
+					lang: langKey,
 					title: sketch.name[langKey],
 					description: sketch.description[langKey],
 					scripts: [`/js/sketch/${sketchName}.js`],

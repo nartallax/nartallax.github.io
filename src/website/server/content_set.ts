@@ -6,7 +6,7 @@ export const contentSet = Lithograph.createContentSet({
 	defaultPageParams: {lang: defaultLangKey},
 	preferredProtocol: "https",
 	domain: "nartallax.github.io",
-	rootDirectoryPath: Path.resolve("../../.."),
+	rootDirectoryPath: Path.resolve("../../../docs"),
 	minifyCss: true,
 	minifyHtml: true,
 	validateHtml: true,

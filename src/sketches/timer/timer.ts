@@ -111,7 +111,7 @@ export function main(): void {
 	let updateTimer = () => {
 		requestAnimationFrame(updateTimer)
 		let now = Date.now()
-		let dTime = (Date.now() - lastUpdateTime) * speed
+		let dTime = (now - lastUpdateTime) * speed
 		lastUpdateTime = now
 		timeAcc += dTime
 		timeEl.textContent = formatTime(Math.round(timeAcc))
