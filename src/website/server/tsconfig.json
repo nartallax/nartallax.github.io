@@ -13,7 +13,8 @@
         "moduleBlacklistRegexp": ["^/client/.*?$"],
         "profiles": {
             "development": {
-                "watchMode": true
+                "watchMode": true,
+                "httpPort": 6344
             }
         }
     },

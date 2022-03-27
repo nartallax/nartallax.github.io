@@ -4,6 +4,8 @@ set -e
 cd `dirname "$0"`
 cd ..
 
+scripts/make_symlinks.sh
+
 ./node_modules/.bin/imploder --tsconfig metaproject/tsconfig.json
 
 WHYNODERUNNINGIMPORT="global.whyIsNodeRunning = require('why-is-node-running');"

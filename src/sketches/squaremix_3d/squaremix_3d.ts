@@ -1,9 +1,15 @@
 import {addCssToPage} from "common/css_utils"
 import {tag, waitLoadEvent, waitUntil} from "common/dom_utils"
+import {makeSketchInfoButton} from "common/sketch_info_button"
+import {watchResize} from "common/watch_resize"
+
+const imageUrl = "/img/sketch/squaremix_3d.png"
+const imageWidth = 1920
+const imageHeight = 1080
 
 function doCss(): void {
 	addCssToPage("squaremix_3d", `
-html, body {
+body {
 	position: absolute;
 	width: 100vw;
 	height: 100vh;
@@ -15,30 +21,31 @@ html, body {
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
+	overflow: hidden;
 }
 
 canvas {
-	border: 2px solid #888;
+	cursor: pointer;
 }
 
 .initial-image {
-	max-width: 100vw;
-	max-height: 100vh;
 	width: auto;
 	height: auto;
 }
 	`)
 }
 
-const columnsCount = 16
-const rowsCount = 16
+async function init(): Promise<void> {
+	document.querySelectorAll("canvas").forEach(el => el.remove())
+	document.querySelectorAll("img").forEach(el => el.remove())
+	let bodyRect = document.body.getBoundingClientRect()
 
-export async function main(): Promise<void> {
-	doCss()
-
-	document.head.appendChild(tag({tagName: "script", src: "/js/three.min.js", async: "async"}))
-
-	let img = tag({tagName: "img", src: "/img/sketch/squaremix_3d.jpg", class: "initial-image"})
+	let img = tag({tagName: "img", src: imageUrl, class: "initial-image"})
+	if(bodyRect.width / bodyRect.height > imageWidth / imageHeight){
+		img.style.maxWidth = "100vw"
+	} else {
+		img.style.maxHeight = "100vh"
+	}
 	document.body.appendChild(img)
 	await Promise.all([
 		waitLoadEvent(img),
@@ -47,27 +54,31 @@ export async function main(): Promise<void> {
 
 	let isActive = false
 
-	let btn = tag({tagName: "input", type: "button", value: "Replay"})
-	btn.addEventListener("click", runAction)
-	document.body.appendChild(btn)
-
-	let rect = img.getBoundingClientRect()
-	let displayWidth = rect.width, displayHeight = rect.height
+	let imgRect = img.getBoundingClientRect()
+	let xRatio = imgRect.width / bodyRect.width
+	let yRatio = imgRect.height / bodyRect.height
 	let scene = new THREE.Scene()
-	let camera = new THREE.OrthographicCamera(-0.5, 0.5, -0.5, 0.5, 0.1, 1000)
+	let camera = new THREE.OrthographicCamera(-0.5 / xRatio, 0.5 / xRatio, -0.5 / yRatio, 0.5 / yRatio, 0.1, 1000)
 	camera.position.z = 2
 	camera.position.x = camera.position.y = 0
 	camera.lookAt(0, 0, 0)
 	camera.rotateZ(Math.PI)
 
+	let squareSize = 100
+	let columnsCount = Math.ceil(imgRect.height / squareSize)
+	let rowsCount = Math.ceil(imgRect.width / squareSize)
+
 	let renderer = new THREE.WebGLRenderer()
-	renderer.setSize(displayWidth, displayHeight)
+	// renderer.setSize(rect.width, rect.height)
+	renderer.setSize(bodyRect.width, bodyRect.height)
 
 	let textureLoader = new THREE.TextureLoader()
 	let texture = await textureLoader.loadAsync(img.src)
 	let material = new THREE.MeshBasicMaterial({map: texture})
 
-	img.after(renderer.domElement)
+	let canvas = renderer.domElement
+	img.after(canvas)
+	canvas.addEventListener("click", runAction)
 	img.remove()
 
 	runAction()
@@ -78,12 +89,20 @@ export async function main(): Promise<void> {
 		}
 		isActive = true
 		try {
-			let action = new TransformAction(scene, material, camera, () => renderer.render(scene, camera))
+			let action = new TransformAction(columnsCount, rowsCount, scene, material, camera, () => renderer.render(scene, camera))
 			await action.run()
 		} finally {
 			isActive = false
 		}
 	}
+}
+
+export function main(): void {
+	doCss()
+	makeSketchInfoButton()
+	document.head.appendChild(tag({tagName: "script", src: "/js/three.min.js", async: "async"}))
+	init()
+	watchResize(document.body, init)
 }
 
 class TransformAction {
@@ -93,6 +112,8 @@ class TransformAction {
 	private readonly group: THREE.Group
 
 	constructor(
+		private readonly columnsCount: number,
+		private readonly rowsCount: number,
 		private readonly scene: THREE.Scene,
 		private readonly material: THREE.Material,
 		private readonly camera: THREE.Camera,
@@ -104,7 +125,7 @@ class TransformAction {
 	}
 
 	async run(): Promise<void> {
-		this.generateColumnObjects()
+		this.generateObjects()
 
 		await forEachFrameProgress(1 / 4, progress => {
 			this.group.rotation.y = (Math.PI / 2) * ((1 - progress) + 2)
@@ -132,12 +153,18 @@ class TransformAction {
 		return result
 	}
 
-	private generateColumnObjects(): void {
+	private generateObjects(): void {
 		for(let x = 0; x < this.colHeights.length; x++){
 			for(let y = 0; y < this.colHeights[x]!.length; y++){
 				this.generateColumnObject(x, y, this.colHeights[x]![y]!)
 			}
 		}
+
+		let plane = this.makeAddSlicePlane(0, 1, 0, 1)
+		plane.translateX(-0.5)
+		plane.translateY(-0.5)
+		plane.translateZ(-0.5)
+		plane.rotateY(-Math.PI / 2)
 	}
 
 	private generateColumnObject(x: number, y: number, height: number): void {
@@ -151,25 +178,25 @@ class TransformAction {
 		}
 		let plane = this.makeAddSlicePlane(
 			1 - height, 1,
-			y / rowsCount, (y + 1) / rowsCount
+			y / this.rowsCount, (y + 1) / this.rowsCount
 		)
 
 		plane.rotateY(-Math.PI / 2)
 
 		plane.translateX(0.5 - height)
-		plane.translateY(y / rowsCount - 0.5)
-		plane.translateZ(-(x + 1) / columnsCount + 0.5)
+		plane.translateY(y / this.rowsCount - 0.5)
+		plane.translateZ(-(x + 1) / this.columnsCount + 0.5)
 	}
 
 	private addTopPlane(x: number, y: number, height: number): void {
 		let plane = this.makeAddSlicePlane(
-			x / columnsCount, (x + 1) / columnsCount,
-			y / rowsCount, (y + 1) / rowsCount,
+			x / this.columnsCount, (x + 1) / this.columnsCount,
+			y / this.rowsCount, (y + 1) / this.rowsCount,
 			true
 		)
 
-		plane.translateX(x / columnsCount - 0.5)
-		plane.translateY(y / rowsCount - 0.5)
+		plane.translateX(x / this.columnsCount - 0.5)
+		plane.translateY(y / this.rowsCount - 0.5)
 		plane.translateZ(0.5 - height)
 	}
 
