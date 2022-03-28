@@ -25,7 +25,7 @@ declare namespace OIMO {
 		body2: string | number | PhysicalObjectInstance
 	}
 
-	export interface Point3D {
+	export interface XYZ {
 		x: number
 		y: number
 		z: number
@@ -40,14 +40,17 @@ declare namespace OIMO {
 
 	export interface PhysicalObjectInstance {
 		remove(): void
-		getPosition(): Point3D
+		getPosition(): XYZ
 		getQuaternion(): Quaternion
 		readonly id: number
+		readonly sleeping: boolean
+		linearVelocity: XYZ
+		angularVelocity: XYZ
 	}
 
 	export interface JoinObjectInstance {
 		remove(): void
-		getPosition(): [Point3D, Point3D]
+		getPosition(): [XYZ, XYZ]
 		readonly body1: PhysicalObjectInstance
 		readonly body2: PhysicalObjectInstance
 	}
