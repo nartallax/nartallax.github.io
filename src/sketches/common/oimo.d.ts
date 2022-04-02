@@ -61,7 +61,7 @@ declare namespace OIMO {
 			iterations: number
 			/** 1 brute force, 2 sweep and prune, 3 volume tree */
 			broadphase: 1 | 2 | 3
-			worldscale: 1 // ???
+			worldscale: number // ???
 			random: boolean
 			info: boolean
 			gravity: [number, number, number] // x, y, z

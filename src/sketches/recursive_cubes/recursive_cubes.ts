@@ -123,6 +123,7 @@ export async function main(): Promise<void> {
 		// world.step()
 		// copyPos(cubePhysics, cube)
 
+		camera.lookAt(section.targetCube.graph.position)
 		renderer.render(scene, camera)
 	}
 
@@ -152,6 +153,7 @@ class Section {
 
 	private readonly cubes: PGObject[]
 	private readonly floor: PGObject
+	readonly targetCube: PGObject
 
 	constructor(
 		private readonly cubeGeometry: THREE.BufferGeometry,
@@ -160,34 +162,52 @@ class Section {
 		private readonly floorMaterial: THREE.Material,
 		private readonly scene: THREE.Scene
 	) {
-		this.cubes = this.createCubes()
+		let {targetCube, cubes} = this.createCubes()
+		this.cubes = cubes
+		this.targetCube = targetCube
 		this.floor = this.createFloor()
 		void this.floor
 	}
 
-	private createCubes(): PGObject[] {
-		let result = [] as PGObject[]
+	private createCubes(): {cubes: PGObject[], targetCube: PGObject} {
+		let cubes = [] as PGObject[]
+		let targetCube = null as PGObject | null
 		for(let x = 0; x < sideCubeCount; x++){
 			for(let y = 0; y < sideCubeCount; y++){
 				for(let z = 0; z < sideCubeCount; z++){
 					let phys = this.world.add({
 						type: "box",
 						size: [1, 1, 1],
-						pos: [x, y + 10, z],
+						pos: [x, y, z],
 						rot: [0, 0, 0],
 						move: true,
 						density: 1,
 						friction: 0.5
 					})
+					phys.linearVelocity.x = 4 + 2 * (Math.random() - 0.5)
+					phys.linearVelocity.y = y * x * 2 + (2 * (Math.random() - 0.5))
+					phys.linearVelocity.z = z - (sideCubeCount / 2) + (2 * (Math.random() - 0.5))
 					let graph = new THREE.Mesh(this.cubeGeometry, this.cubeMaterial)
 					graph.castShadow = true
 					graph.receiveShadow = true
 					this.scene.add(graph)
-					result.push({phys, graph})
+					let pg = {phys, graph}
+					cubes.push(pg)
+					if(x === sideCubeCount - 1 && y === sideCubeCount - 1 && z === Math.floor(sideCubeCount / 2)){
+						phys.linearVelocity.x *= 1.25
+						phys.linearVelocity.y *= 1.25
+						phys.angularVelocity.y = 0
+						phys.angularVelocity.z = 0
+						targetCube = pg
+					} else if(x !== sideCubeCount - 1 && y !== sideCubeCount - 1 && z !== Math.floor(sideCubeCount / 2)){
+						phys.angularVelocity.x = Math.random() * Math.PI
+						phys.angularVelocity.y = Math.random() * Math.PI
+						phys.angularVelocity.z = Math.random() * Math.PI
+					}
 				}
 			}
 		}
-		return result
+		return {cubes, targetCube: targetCube!}
 	}
 
 	private createFloor(): PGObject {
