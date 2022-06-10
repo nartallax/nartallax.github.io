@@ -1,1 +1,0 @@
-/home/nartallax/_projects/nartallax.github.io/src/website/common/types.ts

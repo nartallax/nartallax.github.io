@@ -33,7 +33,7 @@ body {
 }
 
 .speed-input, 
-.reset-button {
+.button {
 	font-size: 2rem;
 	color: #aaa;
 	border: 2px solid #aaa;
@@ -41,6 +41,8 @@ body {
 	cursor: pointer;
 	transition: 0.25s;
 	border-radius: 3px;
+
+	margin: 0.5rem;
 }
 
 .speed-input:hover, 
@@ -77,6 +79,61 @@ function formatTime(time: number): string {
 	return `${twoDigis(h)}:${twoDigis(m)}:${twoDigis(s)}.${threeDigits(ms)}`
 }
 
+function formatTimeShort(time: number): string {
+	let result = formatTime(time).replace(/^[0:]+/, "") // lol
+	if(result.startsWith(".")){
+		result = "0" + result
+	}
+	return result
+}
+
+function intOrZero(x: string): number {
+	let result = parseInt(x)
+	if(Number.isNaN(result) || !Number.isFinite(result)){
+		return 0
+	} else {
+		return result
+	}
+}
+
+function parseTime(time: string): number {
+	let parts = time.split(":")
+	let msec = 0
+	if(parts.length > 0){
+		let lastPart = parts[parts.length - 1]!
+		let secParts = lastPart.split(".")
+		if(secParts.length === 2){
+			let [secondsPart, msecPart] = secParts
+			parts[parts.length - 1] = secondsPart
+			msec += intOrZero(msecPart)
+		}
+	}
+
+	let mult = 1000
+	for(let i = parts.length - 1; i >= 0; i--){
+		let part = parts[i]!
+		msec += intOrZero(part) * mult
+		mult *= 60
+	}
+	return msec
+}
+
+function onAnyChange(input: HTMLInputElement, handler: (value: string) => void): void {
+	let lastValue = input.value
+	let wrappedHandler = () => {
+		let value = input.value
+		if(value !== lastValue){
+			lastValue = value
+			handler(value)
+		}
+	}
+	input.addEventListener("change", wrappedHandler)
+	input.addEventListener("mousedown", wrappedHandler)
+	input.addEventListener("mouseup", wrappedHandler)
+	input.addEventListener("keydown", wrappedHandler)
+	input.addEventListener("keyup", wrappedHandler)
+}
+
 export function main(): void {
 	doCss()
 	let wrap = tag({class: "wrap"})
@@ -84,40 +141,73 @@ export function main(): void {
 	let timeEl = tag({class: "timer"})
 	wrap.appendChild(timeEl)
 
-	let resetBtn = tag({tagName: "input", type: "button", value: "reset", class: "reset-button"})
-	resetBtn.addEventListener("click", () => timeAcc = 0)
+	let resetBtn = tag({tagName: "input", type: "button", value: "reset", class: "button"})
+	resetBtn.addEventListener("click", () => {
+		timeAcc = 0
+		updateText()
+	})
 	wrap.appendChild(resetBtn)
+
+	let pauseBtn = tag({tagName: "input", type: "button", value: "pause", class: "button"})
+	pauseBtn.addEventListener("click", () => {
+		if(paused){
+			paused = false
+			pauseBtn.textContent = "pause"
+		} else {
+			paused = true
+			pauseBtn.textContent = "unpause"
+		}
+	})
+	wrap.appendChild(pauseBtn)
 
 	let speedBlock = tag({class: "speed-block", text: "Speed: "})
 	let speedInput = tag({tagName: "input", type: "number", value: 1, class: "speed-input"})
-	let speed = 1
-	let updateSpeed = () => {
+	onAnyChange(speedInput, () => {
 		let parsed = parseFloat(speedInput.value)
 		if(Number.isNaN(parsed) || !Number.isFinite(parsed)){
 			console.warn("Bad speed value: " + JSON.stringify(speedInput.value) + ": cannot parse")
 			return
 		}
 		speed = parsed
-	}
-	speedInput.addEventListener("change", updateSpeed)
-	speedInput.addEventListener("mousedown", updateSpeed)
-	speedInput.addEventListener("mouseup", updateSpeed)
-	speedInput.addEventListener("keydown", updateSpeed)
-	speedInput.addEventListener("keyup", updateSpeed)
+	})
 	speedBlock.appendChild(speedInput)
 	wrap.appendChild(speedBlock)
 
+
+	let addTimeBlock = tag({class: "add-time-block"})
+	let addTimeButton = tag({tagName: "input", type: "button", value: "Add time", class: "button"})
+	addTimeButton.addEventListener("click", () => {
+		timeAcc += parseTime(addTimeInput.value)
+		updateText()
+	})
+	addTimeBlock.appendChild(addTimeButton)
+	let addTimeInput = tag({tagName: "input", type: "string", value: "5:00.000", class: "speed-input"})
+	addTimeInput.addEventListener("blur", () => {
+		addTimeInput.value = formatTimeShort(parseTime(addTimeInput.value))
+	})
+	addTimeBlock.appendChild(addTimeInput)
+
+	wrap.appendChild(addTimeBlock)
+
 	document.body.appendChild(wrap)
 
+	function updateText(): void {
+		timeEl.textContent = formatTime(Math.round(timeAcc))
+	}
+
 	let timeAcc = 0
+	let paused = false
+	let speed = 1
 	let lastUpdateTime = Date.now()
 	let updateTimer = () => {
 		requestAnimationFrame(updateTimer)
 		let now = Date.now()
 		let dTime = (now - lastUpdateTime) * speed
 		lastUpdateTime = now
-		timeAcc += dTime
-		timeEl.textContent = formatTime(Math.round(timeAcc))
+		if(!paused){
+			timeAcc += dTime
+			updateText()
+		}
 	}
 	updateTimer()
 
