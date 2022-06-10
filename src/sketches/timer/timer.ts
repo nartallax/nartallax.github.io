@@ -152,10 +152,10 @@ export function main(): void {
 	pauseBtn.addEventListener("click", () => {
 		if(paused){
 			paused = false
-			pauseBtn.textContent = "pause"
+			pauseBtn.value = "pause"
 		} else {
 			paused = true
-			pauseBtn.textContent = "unpause"
+			pauseBtn.value = "unpause"
 		}
 	})
 	wrap.appendChild(pauseBtn)
