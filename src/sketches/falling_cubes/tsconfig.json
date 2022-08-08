@@ -6,7 +6,7 @@
 
     "imploderConfig": {
         "target": "es5",
-        "entryModule": "recursive_cubes.ts",
+        "entryModule": "falling_cubes.ts",
         "entryFunction": "main",
         "outFile": "js/bundle.js",
         "profiles": {

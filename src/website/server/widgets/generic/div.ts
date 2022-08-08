@@ -1,8 +1,8 @@
-import {contentSet} from "content_set";
+import {contentSet} from "content_set"
 
-export const Div = contentSet.addWidgetWithOptionalParams<{class?: string, attrs?:{[k: string]: string}}>(
+export const Div = contentSet.addWidgetWithOptionalParams<{class?: string, attrs?: {[k: string]: string}}>(
 	(_, opts, body) => {
-		let result = "<div";
+		let result = "<div"
 		if(opts && opts.class){
 			result += ` class="${opts.class}"`
 		}
@@ -11,6 +11,6 @@ export const Div = contentSet.addWidgetWithOptionalParams<{class?: string, attrs
 				result += ` ${k}="${opts.attrs[k]}"`
 			}
 		}
-		return result + ">" + body + "</div>";
+		return body ? result + ">" + body + "</div>" : "/>"
 	}
 )

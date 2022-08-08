@@ -68,6 +68,9 @@ let twoDigis = (x: number): string => x < 10 ? "0" + x : "" + x
 let threeDigits = (x: number): string => x < 10 ? "00" + x : x < 100 ? "0" + x : "" + x
 
 function formatTime(time: number): string {
+	if(time < 0){
+		return "-" + formatTime(-time)
+	}
 	let ms = time % 1000
 	time = Math.floor(time / 1000)
 

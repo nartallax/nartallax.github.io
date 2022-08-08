@@ -1,10 +1,5 @@
-import {addCssToPage} from "common/css_utils"
 import {tag, waitUntil} from "common/dom_utils"
-
-function doCss(): void {
-	addCssToPage("recursive_cubes", `
-	`)
-}
+import {makeSketchInfoButton} from "common/sketch_info_button"
 
 function copyPos(phys: OIMO.PhysicalObjectInstance, graph: THREE.Object3D): void {
 	let q = phys.getQuaternion()
@@ -46,7 +41,7 @@ function makeHorisontalRectGeom(def: {zSize: number, xSize: number, dy: number})
 }
 
 export async function main(): Promise<void> {
-	doCss()
+	makeSketchInfoButton()
 	document.head.appendChild(tag({tagName: "script", src: "/js/three.min.js", async: "async"}))
 	document.head.appendChild(tag({tagName: "script", src: "/js/oimo.min.js", async: "async"}))
 	await waitUntil(() => typeof(THREE) !== "undefined" && typeof(OIMO) !== "undefined")
@@ -61,17 +56,13 @@ export async function main(): Promise<void> {
 	renderer.setSize(window.innerWidth, window.innerHeight)
 	renderer.shadowMap.enabled = true
 	renderer.shadowMap.type = THREE.PCFSoftShadowMap
-	document.body.appendChild(renderer.domElement)
 
-	// let world = new OIMO.World({
-	// 	timestep: 1 / 60,
-	// 	iterations: 8,
-	// 	broadphase: 2,
-	// 	worldscale: 1,
-	// 	random: false,
-	// 	info: false,
-	// 	gravity: [0, -9.8, 0]
-	// })
+	let canvas = renderer.domElement
+	document.body.appendChild(canvas)
+	canvas.addEventListener("click", () => {
+		start()
+	})
+	canvas.style.cursor = "pointer"
 
 	let texture = await textureLoader.loadAsync("/img/sketch/recursive_cubes_orange_square.png")
 	let cubeMaterial = new THREE.MeshLambertMaterial({map: texture})
@@ -103,34 +94,42 @@ export async function main(): Promise<void> {
 		// scene.add(new THREE.CameraHelper(light.shadow.camera))
 	}
 
-
-
-	let section = new Section(
-		cubeGeometry, cubeMaterial,
-		floorGeometry, floorMaterial,
-		scene
-	)
-
-	camera.position.x = 10
-	camera.position.y = 10
-	camera.position.z = 10
+	camera.position.x = 25
+	camera.position.y = 25
+	camera.position.z = 25
 	camera.lookAt(0, 0, 0)
 
-	function animate() {
-		requestAnimationFrame(animate)
-		section.step()
+	let section: Section | null = null
+	function start(): void {
+		let currentSection = new Section(
+			cubeGeometry, cubeMaterial,
+			floorGeometry, floorMaterial,
+			scene
+		)
 
-		// world.step()
-		// copyPos(cubePhysics, cube)
+		if(section){
+			section.delete()
+		}
+		section = currentSection
 
-		camera.lookAt(section.targetCube.graph.position)
-		renderer.render(scene, camera)
+		function animate() {
+			if(section !== currentSection){
+				return
+			}
+			requestAnimationFrame(animate)
+			currentSection.step()
+
+			camera.lookAt(currentSection.targetCube.graph.position)
+			renderer.render(scene, camera)
+		}
+
+		animate()
 	}
 
-	animate()
+	start()
 }
 
-const sideCubeCount = 3
+const sideCubeCount = 5
 const floorSideSize = 100
 const floorHeight = 1
 
@@ -166,7 +165,19 @@ class Section {
 		this.cubes = cubes
 		this.targetCube = targetCube
 		this.floor = this.createFloor()
-		void this.floor
+	}
+
+	delete(): void {
+		this.rmPg(this.floor)
+		for(let cube of this.cubes){
+			this.rmPg(cube)
+		}
+
+	}
+
+	private rmPg(pg: PGObject): void {
+		this.scene.remove(pg.graph)
+		pg.phys.remove()
 	}
 
 	private createCubes(): {cubes: PGObject[], targetCube: PGObject} {
@@ -178,15 +189,17 @@ class Section {
 					let phys = this.world.add({
 						type: "box",
 						size: [1, 1, 1],
-						pos: [x, y, z],
+						pos: [x, y + 25, z],
 						rot: [0, 0, 0],
 						move: true,
 						density: 1,
 						friction: 0.5
 					})
-					phys.linearVelocity.x = 4 + 2 * (Math.random() - 0.5)
-					phys.linearVelocity.y = y * x * 2 + (2 * (Math.random() - 0.5))
+					// phys.linearVelocity.x = 4 + 2 * (Math.random() - 0.5)
+					// phys.linearVelocity.y = y * x * 2 + (2 * (Math.random() - 0.5))
+					phys.linearVelocity.x = x - (sideCubeCount / 2) + (2 * (Math.random() - 0.5))
 					phys.linearVelocity.z = z - (sideCubeCount / 2) + (2 * (Math.random() - 0.5))
+					phys.linearVelocity.y = y - (sideCubeCount / 2) + (2 * (Math.random() - 0.5))
 					let graph = new THREE.Mesh(this.cubeGeometry, this.cubeMaterial)
 					graph.castShadow = true
 					graph.receiveShadow = true
@@ -194,10 +207,10 @@ class Section {
 					let pg = {phys, graph}
 					cubes.push(pg)
 					if(x === sideCubeCount - 1 && y === sideCubeCount - 1 && z === Math.floor(sideCubeCount / 2)){
-						phys.linearVelocity.x *= 1.25
-						phys.linearVelocity.y *= 1.25
-						phys.angularVelocity.y = 0
-						phys.angularVelocity.z = 0
+						// phys.linearVelocity.x *= 1.25
+						// phys.linearVelocity.y *= 1.25
+						// phys.angularVelocity.y = 0
+						// phys.angularVelocity.z = 0
 						targetCube = pg
 					} else if(x !== sideCubeCount - 1 && y !== sideCubeCount - 1 && z !== Math.floor(sideCubeCount / 2)){
 						phys.angularVelocity.x = Math.random() * Math.PI

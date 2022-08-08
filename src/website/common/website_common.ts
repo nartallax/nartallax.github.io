@@ -59,6 +59,13 @@ const _tags = {
 			en: "Visual composition that uses THREE.js to render."
 		}
 	},
+	oimojs: {
+		name: {ru: "Oimo.js", en: "Oimo.js"},
+		description: {
+			ru: "Физическая симуляция с использованием движка Oimo.js.",
+			en: "Physical simulation using Oimo.js engine."
+		}
+	},
 	tool: {
 		name: {ru: "Инструмент", en: "Tool"},
 		description: {

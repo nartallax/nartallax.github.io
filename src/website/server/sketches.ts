@@ -1,17 +1,17 @@
 import {tags, SketchDescription} from "website_common"
 
 const _sketches = {
-	recursive_cubes: {
-		name: {ru: "Рекурсивные кубы", en: "Recursive cubes"},
+	falling_cubes: {
+		name: {ru: "Падающие кубы", en: "Falling cubes"},
 		description: {
-			ru: "Зацикленная анимация падающих кубов",
-			en: "Cycled animation of falling cubes"
+			ru: "Анимация падающих кубов",
+			en: "Animation of falling cubes"
 		},
 		inspiration: [{
 			description: {ru: "Гифка без явного источника", en: "A gif without clear source"}
 		}],
 		date: new Date(2022, 2, 27),
-		tags: [tags.threejs]
+		tags: [tags.threejs, tags.oimojs]
 	},
 	timer: {
 		name: {ru: "Таймер", en: "Timer"},
