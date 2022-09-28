@@ -83,6 +83,22 @@ export function waitLoadEvent(el: HTMLElement): Promise<void> {
 	})
 }
 
+export function waitReadyState(state: DocumentReadyState = "complete"): Promise<void> {
+	return new Promise(ok => {
+		function check(): boolean {
+			if(document.readyState !== state){
+				return false
+			}
+			ok()
+			document.removeEventListener("readystatechange", check)
+			return true
+		}
+
+		document.addEventListener("readystatechange", check)
+		check()
+	})
+}
+
 export function waitUntil(checker: () => boolean, timeLimit = 5000, checkInterval = 50): Promise<void> {
 	return new Promise((ok, bad) => {
 		let timePassed = 0

@@ -100,6 +100,13 @@ const _tags = {
 			ru: "Демонстрация эволюции.",
 			en: "Demonstration of evolution."
 		}
+	},
+	game: {
+		name: {ru: "Игра", en: "Game"},
+		description: {
+			ru: "Интерактивное развлечение.",
+			en: "Interactive piece of enternainment."
+		}
 	}
 }
 

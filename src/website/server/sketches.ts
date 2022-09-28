@@ -1,6 +1,21 @@
 import {tags, SketchDescription} from "website_common"
 
 const _sketches = {
+
+	digger: {
+		name: {ru: "Диггер", en: "Digger"},
+		description: {
+			ru: "Игра про добычу полезных ископаемых.",
+			en: "Game about excavation of useful minerals."
+		},
+		inspiration: [{
+			description: {ru: "Старая DOS-игра", en: "Old DOS game"},
+			url: "https://www.youtube.com/watch?v=l0yQfyJlqdA"
+		}],
+		date: new Date(2022, 7, 9),
+		tags: [tags.game, tags.svg]
+	},
+
 	falling_cubes: {
 		name: {ru: "Падающие кубы", en: "Falling cubes"},
 		description: {
@@ -13,6 +28,7 @@ const _sketches = {
 		date: new Date(2022, 2, 27),
 		tags: [tags.threejs, tags.oimojs]
 	},
+
 	timer: {
 		name: {ru: "Таймер", en: "Timer"},
 		description: {
@@ -25,6 +41,7 @@ const _sketches = {
 		date: new Date(2022, 2, 27),
 		tags: [tags.tool]
 	},
+
 	squaremix_3d: {
 		name: {ru: "Квадратный микс", en: "Square mix"},
 		description: {
@@ -41,6 +58,7 @@ const _sketches = {
 		date: new Date(2022, 2, 25),
 		tags: [tags.threejs]
 	},
+
 	star_travel: {
 		name: {ru: "Навстречу звездам", en: "Star travel"},
 		description: {
@@ -54,6 +72,7 @@ const _sketches = {
 		date: new Date(2021, 8, 18),
 		tags: [tags.art, tags.svg, tags.css]
 	}
+
 }
 
 export const sketches: {readonly [k in keyof(typeof _sketches)]: SketchDescription} = _sketches
