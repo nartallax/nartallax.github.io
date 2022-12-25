@@ -1,18 +1,5 @@
-$very-dark: #111;
-$dark: #333;
-$lighter-dark: #555;
-$light: #aaa;
-$very-light: #ddd;
-
-.default-font {
-	font-size: 1rem;
-	color: $very-light;
-	font-weight: bold;
-	font-family: Arial, Helvetica, sans-serif;
-}
-
-.default-container-look {
-	background: $dark;
-	border: 2px solid $light;
-	border-radius: 2px;
-}
+$background-color: #001427;
+$foreground-primary-color: #B23A48;
+$foreground-secondary-color: #8C2F39;
+$font-color: #faf0ca;
+$font-secondary-color: #f4d35e;

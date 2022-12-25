@@ -1,25 +1,7 @@
-import {addCssToPage} from "common/css_utils"
-import {waitReadyState} from "common/dom_utils"
-import {DiggerWorld, DiggerWorldOptions} from "digger/digger_world"
+import {DiggerWorld, DiggerWorldOptions} from "./digger_world"
 
-function doCss(): void {
-	addCssToPage("digger", `
-html, body {
-	position: absolute;
-	width: 100vw;
-	height: 100vh;
-	border: 0;
-	margin: 0;
-	padding: 0;
-	overflow: hidden;
-}`)
-}
-
-export async function main(): Promise<void> {
-	await waitReadyState()
-	doCss()
-
-	let config: DiggerWorldOptions = {
+export async function main(root: HTMLElement): Promise<void> {
+	const config: DiggerWorldOptions = {
 		widthCells: 15,
 		heightCells: 10,
 		screenWidth: document.body.clientWidth,
@@ -35,8 +17,8 @@ export async function main(): Promise<void> {
 		}
 	}
 
-	let world = new DiggerWorld(config)
-	document.body.appendChild(world.el)
+	const world = new DiggerWorld(config)
+	root.appendChild(world.el)
 	world.start()
 
 	world.digVertical(0, 0, 5)

@@ -1,0 +1,42 @@
+.sketchInfoButton {
+	border-radius: 100%;
+	border: 3px solid #fff;
+	opacity: 0.75;
+	position: absolute;
+	top: 0.5rem;
+	left: 0.5rem;
+	cursor: pointer;
+	transition: 0.25s;
+	width: 2rem;
+    height: 2rem;
+    text-align: center;
+    font-weight: bold;
+    font-size: 2rem;
+    color: #fff;
+
+	&:hover {
+		opacity: 1;
+	}
+
+}
+
+.sketchInfoBlock {
+	position: absolute;
+	top: 0;
+	left: 0;
+	border: 2px solid #ddd;
+	background: #444;
+	color: #ddd;
+	padding: 0.5em;
+	font-weight: normal;
+	border-width: 0 2px 2px 0;
+
+	a {
+		color: #fff;
+	}
+}
+
+.sketchInfoSubline {
+	margin-left: 0.5em;
+	display: block;
+}

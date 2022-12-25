@@ -1,0 +1,49 @@
+{
+  "name": "nartallax.github.io",
+  "version": "1.0.0",
+  "description": "Nartallax's personal website",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nartallax/nartallax.github.io.git"
+  },
+  "author": "Nartallax",
+  "license": "0BSD",
+  "bugs": {
+    "url": "https://github.com/nartallax/nartallax.github.io/issues"
+  },
+  "homepage": "https://github.com/nartallax/nartallax.github.io#readme",
+  "devDependencies": {
+    "@nartallax/parcel-packager-js-with-circular-dep-resolving": "^2.8.2-alpha.7",
+    "@parcel/transformer-sass": "^2.8.2",
+    "@types/node": "^18.11.17",
+    "@types/three": "^0.138.0",
+    "@typescript-eslint/eslint-plugin": "^4.30.0",
+    "@typescript-eslint/parser": "^4.30.0",
+    "eslint": "^7.32.0",
+    "parcel": "^2.8.2",
+    "parcel-resolver-ts-base-url": "^1.3.1",
+    "process": "^0.11.10",
+    "tsc": "^2.0.3",
+    "typescript": "^4.9.4"
+  },
+  "targets": {
+    "dev": {
+      "distDir": "./docs",
+      "source": "./src/website/index.html"
+    },
+    "release": {
+      "distDir": "./docs",
+      "publicUrl": "https://nartallax.github.io",
+      "source": "./src/website/index.html"
+    },
+    "test": {
+      "distDir": "./docs",
+      "context": "node",
+      "source": "src/test/test_main.ts",
+      "optimize": false
+    }
+  },
+  "dependencies": {
+    "three": "^0.148.0"
+  }
+}

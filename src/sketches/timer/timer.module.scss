@@ -1,0 +1,45 @@
+.timerRoot {
+	background: #222;
+}
+
+.wrap {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+}
+
+.timer {
+	font-size: 5rem;
+	color: #ccc;
+	font-family: 'courier new';
+}
+
+.speedInput, 
+.button {
+	font-size: 2rem;
+	color: #aaa;
+	border: 2px solid #aaa;
+	background: #444;
+	cursor: pointer;
+	transition: 0.25s;
+	border-radius: 3px;
+
+	margin: 0.5rem;
+}
+
+.speedInput:hover, 
+.resetButton:hover {
+	color: #fff;
+	border-color: #fff;
+	background: #888;
+}
+
+.speedBlock {
+	margin: 0.5rem;
+	font-size: 2rem;
+}
+
+.speedInput {
+	max-width: 5em;
+}

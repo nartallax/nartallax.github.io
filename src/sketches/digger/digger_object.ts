@@ -1,4 +1,4 @@
-import {DiggerWorld} from "digger/digger_world"
+import {DiggerWorld} from "./digger_world"
 
 export abstract class DiggerObject {
 

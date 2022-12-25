@@ -1,6 +1,6 @@
 import {Bitmap} from "common/bitmap"
-import {tag} from "common/dom_utils"
 import {RectanlgeDeduplicator} from "common/rectangle_deduplicator"
+import {tag} from "common/tag"
 
 export interface DiggerWorldOptions {
 	readonly widthCells: number
@@ -42,10 +42,10 @@ export class DiggerWorld {
 
 	constructor(private readonly options: DiggerWorldOptions) {
 
-		let cellSizeByWidth = options.screenWidth / options.widthCells
-		let cellSizeByHeight = options.screenHeight / (options.heightCells + 1)
+		const cellSizeByWidth = options.screenWidth / options.widthCells
+		const cellSizeByHeight = options.screenHeight / (options.heightCells + 1)
 		this.cellSizePx = Math.floor(Math.min(cellSizeByWidth, cellSizeByHeight))
-		let hMarginSum = options.screenWidth - (this.cellSizePx * options.widthCells)
+		const hMarginSum = options.screenWidth - (this.cellSizePx * options.widthCells)
 		this.soilMarginLeft = Math.ceil(hMarginSum / 2)
 		// this.soilMarginRight = hMarginSum - this.soilMarginLeft
 		// this.soilMarginBottom = options.screenHeight - (this.cellSizePx * (options.heightCells + 1))
@@ -57,10 +57,12 @@ export class DiggerWorld {
 
 		this.el = tag({
 			tagName: "canvas",
-			width: options.screenWidth,
-			height: options.screenHeight
+			attrs: {
+				width: options.screenWidth,
+				height: options.screenHeight
+			}
 		})
-		let ctx = this.el.getContext("2d")
+		const ctx = this.el.getContext("2d")
 		if(!ctx){
 			throw new Error("Browser can't canvas 2d")
 		}
@@ -92,19 +94,19 @@ export class DiggerWorld {
 	}
 
 	private dramaticDrawInitialTerrain(deltaTime: number): void {
-		let startAt = this.dramaticDrawProgress
+		const startAt = this.dramaticDrawProgress
 
-		let limit = this.options.screenWidth * (this.options.screenHeight - this.cellSizePx)
-		let drawSpeed = limit / this.options.dramaticDrawTiming.terrain
-		let pixelsToDraw = Math.floor(deltaTime * drawSpeed)
+		const limit = this.options.screenWidth * (this.options.screenHeight - this.cellSizePx)
+		const drawSpeed = limit / this.options.dramaticDrawTiming.terrain
+		const pixelsToDraw = Math.floor(deltaTime * drawSpeed)
 		this.dramaticDrawProgress = Math.min(
 			limit,
 			this.dramaticDrawProgress + pixelsToDraw
 		)
 
 		for(let i = startAt; i < this.dramaticDrawProgress; i++){
-			let x = (i % this.options.screenWidth)
-			let y = ((i - x) / this.options.screenWidth) + this.cellSizePx
+			const x = (i % this.options.screenWidth)
+			const y = ((i - x) / this.options.screenWidth) + this.cellSizePx
 			this.drawTerrainPixelAt(x, y, true)
 		}
 
@@ -119,9 +121,9 @@ export class DiggerWorld {
 	}
 
 	private redrawInvalidatedRectangles(): void {
-		for(let rect of this.invalidatedRects.getNonIntersectingRects()){
-			let xLim = rect.x + rect.w
-			let yLim = rect.y + rect.h
+		for(const rect of this.invalidatedRects.getNonIntersectingRects()){
+			const xLim = rect.x + rect.w
+			const yLim = rect.y + rect.h
 			for(let x = rect.x; x < xLim; x++){
 				for(let y = rect.y; y < yLim; y++){
 					this.redrawTerrainAt(x, y)
@@ -156,9 +158,9 @@ export class DiggerWorld {
 		this.reset()
 
 		let prevTime = 0
-		let doTick = (time: number) => {
+		const doTick = (time: number) => {
 			this.raf = requestAnimationFrame(doTick)
-			let deltaTime = Math.min(1000 / 15, time - prevTime) / 1000
+			const deltaTime = Math.min(1000 / 15, time - prevTime) / 1000
 			prevTime = time
 			this.onTick(deltaTime)
 		}
@@ -176,17 +178,17 @@ export class DiggerWorld {
 
 	digVertical(cellX: number, startCellY: number, endCellY: number): void {
 		if(startCellY > endCellY){
-			let buf = startCellY
+			const buf = startCellY
 			endCellY = startCellY
 			startCellY = buf
 		}
-		let width = this.cellSizePx * (1 - this.options.wallThickness)
-		let xStart = (cellX * this.cellSizePx) - (width / 2)
-		let xEnd = xStart + width
-		let yStart = startCellY * this.cellSizePx
-		let yEnd = endCellY * this.cellSizePx
+		const width = this.cellSizePx * (1 - this.options.wallThickness)
+		const xStart = (cellX * this.cellSizePx) - (width / 2)
+		const xEnd = xStart + width
+		const yStart = startCellY * this.cellSizePx
+		const yEnd = endCellY * this.cellSizePx
 		for(let y = yStart; y <= yEnd; y++){
-			let rowStart = (y * this.playgroundWidthPx)
+			const rowStart = (y * this.playgroundWidthPx)
 			for(let x = xStart; x <= xEnd; x++){
 				this.terrain.clear(rowStart + x)
 			}

@@ -1,0 +1,43 @@
+@keyframes startravel-starfly {
+	0% { 
+		transform: scale(0.1) translate(0, 0);
+		opacity: 0;
+	}
+	50% {
+		transform: scale(0.1) translate(0, 0);
+		opacity: 1;
+	}
+	100% { 
+		transform: scale(5) translate(100%, 0);
+		opacity: 1;
+	}
+}
+
+@keyframes startravel-rotate-bg {
+	from { 
+		transform: translate(50%, 50%) rotate(0deg) translate(-50%, -50%);
+	}
+	to { 
+		transform: translate(50%, 50%) rotate(360deg) translate(-50%, -50%);
+	}
+}
+
+.startravelSvg {
+	position: relative;
+	background: #000;
+	width: 100%;
+	height: 100%;
+}
+
+.startravelStar > g {
+	animation: startravel-starfly 1s cubic-bezier(1,0,1,0);
+	animation-fill-mode: forwards;
+}
+
+.startravelStar circle {
+	filter: brightness(200%);
+}
+
+.startravelBackground {
+	animation: startravel-rotate-bg 250s linear infinite;
+}

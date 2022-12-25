@@ -1,23 +1,23 @@
-import {tag, waitUntil} from "common/dom_utils"
-import {makeSketchInfoButton} from "common/sketch_info_button"
+import * as THREE from "three"
+import * as OIMO from "lib/oimo"
 
 function copyPos(phys: OIMO.PhysicalObjectInstance, graph: THREE.Object3D): void {
-	let q = phys.getQuaternion()
+	const q = phys.getQuaternion()
 	graph.quaternion.x = q.x
 	graph.quaternion.y = q.y
 	graph.quaternion.z = q.z
 	graph.quaternion.w = q.w
 
-	let p = phys.getPosition()
+	const p = phys.getPosition()
 	graph.position.x = p.x
 	graph.position.y = p.y
 	graph.position.z = p.z
 }
 
 function makeHorisontalRectGeom(def: {zSize: number, xSize: number, dy: number}): THREE.BufferGeometry {
-	let geometry = new THREE.PlaneGeometry(1, 1, 1)
+	const geometry = new THREE.PlaneGeometry(1, 1, 1)
 
-	let pos = geometry.attributes.position
+	const pos = geometry.attributes.position!
 	for(let i = 0; i < pos.count; i++){
 		pos.setXYZ(i,
 			-pos.getX(i) * def.xSize,
@@ -27,7 +27,7 @@ function makeHorisontalRectGeom(def: {zSize: number, xSize: number, dy: number})
 	}
 	pos.needsUpdate = true
 
-	let norm = geometry.attributes.normal
+	const norm = geometry.attributes.normal!
 	for(let i = 0; i < norm.count; i++){
 		norm.setXYZ(i,
 			-norm.getX(i) * def.xSize,
@@ -40,44 +40,39 @@ function makeHorisontalRectGeom(def: {zSize: number, xSize: number, dy: number})
 	return geometry
 }
 
-export async function main(): Promise<void> {
-	makeSketchInfoButton()
-	document.head.appendChild(tag({tagName: "script", src: "/js/three.min.js", async: "async"}))
-	document.head.appendChild(tag({tagName: "script", src: "/js/oimo.min.js", async: "async"}))
-	await waitUntil(() => typeof(THREE) !== "undefined" && typeof(OIMO) !== "undefined")
+export async function main(root: HTMLElement): Promise<void> {
+	const textureLoader = new THREE.TextureLoader()
+	const scene = new THREE.Scene()
+	const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
 
-	let textureLoader = new THREE.TextureLoader()
-	let scene = new THREE.Scene()
-	let camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
-
-	let renderer = new THREE.WebGLRenderer({
+	const renderer = new THREE.WebGLRenderer({
 		antialias: true
 	})
 	renderer.setSize(window.innerWidth, window.innerHeight)
 	renderer.shadowMap.enabled = true
 	renderer.shadowMap.type = THREE.PCFSoftShadowMap
 
-	let canvas = renderer.domElement
-	document.body.appendChild(canvas)
+	const canvas = renderer.domElement
+	root.appendChild(canvas)
 	canvas.addEventListener("click", () => {
 		start()
 	})
 	canvas.style.cursor = "pointer"
 
-	let texture = await textureLoader.loadAsync("/img/sketch/recursive_cubes_orange_square.png")
-	let cubeMaterial = new THREE.MeshLambertMaterial({map: texture})
-	let cubeGeometry = new THREE.BoxGeometry(1, 1, 1)
+	const texture = await textureLoader.loadAsync("/img/sketch/recursive_cubes_orange_square.png")
+	const cubeMaterial = new THREE.MeshLambertMaterial({map: texture})
+	const cubeGeometry = new THREE.BoxGeometry(1, 1, 1)
 
-	let floorGeometry = makeHorisontalRectGeom({xSize: 100, zSize: 100, dy: 0.5})
-	let floorMaterial = new THREE.MeshLambertMaterial({color: 0x3a2434})
+	const floorGeometry = makeHorisontalRectGeom({xSize: 100, zSize: 100, dy: 0.5})
+	const floorMaterial = new THREE.MeshLambertMaterial({color: 0x3a2434})
 
 	{
-		let light = new THREE.AmbientLight(0xffffff, 0.5)
+		const light = new THREE.AmbientLight(0xffffff, 0.5)
 		scene.add(light)
 	}
 
 	{
-		let light = new THREE.DirectionalLight(0xffffff, 0.75)
+		const light = new THREE.DirectionalLight(0xffffff, 0.75)
 		light.castShadow = true
 		light.shadow.mapSize.width = 2048
 		light.shadow.mapSize.height = 2048
@@ -101,7 +96,7 @@ export async function main(): Promise<void> {
 
 	let section: Section | null = null
 	function start(): void {
-		let currentSection = new Section(
+		const currentSection = new Section(
 			cubeGeometry, cubeMaterial,
 			floorGeometry, floorMaterial,
 			scene
@@ -161,7 +156,7 @@ class Section {
 		private readonly floorMaterial: THREE.Material,
 		private readonly scene: THREE.Scene
 	) {
-		let {targetCube, cubes} = this.createCubes()
+		const {targetCube, cubes} = this.createCubes()
 		this.cubes = cubes
 		this.targetCube = targetCube
 		this.floor = this.createFloor()
@@ -169,7 +164,7 @@ class Section {
 
 	delete(): void {
 		this.rmPg(this.floor)
-		for(let cube of this.cubes){
+		for(const cube of this.cubes){
 			this.rmPg(cube)
 		}
 
@@ -181,12 +176,12 @@ class Section {
 	}
 
 	private createCubes(): {cubes: PGObject[], targetCube: PGObject} {
-		let cubes = [] as PGObject[]
+		const cubes = [] as PGObject[]
 		let targetCube = null as PGObject | null
 		for(let x = 0; x < sideCubeCount; x++){
 			for(let y = 0; y < sideCubeCount; y++){
 				for(let z = 0; z < sideCubeCount; z++){
-					let phys = this.world.add({
+					const phys = this.world.add({
 						type: "box",
 						size: [1, 1, 1],
 						pos: [x, y + 25, z],
@@ -200,11 +195,11 @@ class Section {
 					phys.linearVelocity.x = x - (sideCubeCount / 2) + (2 * (Math.random() - 0.5))
 					phys.linearVelocity.z = z - (sideCubeCount / 2) + (2 * (Math.random() - 0.5))
 					phys.linearVelocity.y = y - (sideCubeCount / 2) + (2 * (Math.random() - 0.5))
-					let graph = new THREE.Mesh(this.cubeGeometry, this.cubeMaterial)
+					const graph = new THREE.Mesh(this.cubeGeometry, this.cubeMaterial)
 					graph.castShadow = true
 					graph.receiveShadow = true
 					this.scene.add(graph)
-					let pg = {phys, graph}
+					const pg = {phys, graph}
 					cubes.push(pg)
 					if(x === sideCubeCount - 1 && y === sideCubeCount - 1 && z === Math.floor(sideCubeCount / 2)){
 						// phys.linearVelocity.x *= 1.25
@@ -224,7 +219,7 @@ class Section {
 	}
 
 	private createFloor(): PGObject {
-		let phys = this.world.add({
+		const phys = this.world.add({
 			type: "box",
 			size: [floorSideSize, floorHeight, floorSideSize],
 			pos: [0, -floorHeight, 0],
@@ -232,7 +227,7 @@ class Section {
 			density: 1,
 			friction: 0.5
 		})
-		let graph = new THREE.Mesh(this.floorGeometry, this.floorMaterial)
+		const graph = new THREE.Mesh(this.floorGeometry, this.floorMaterial)
 		graph.receiveShadow = true
 		this.scene.add(graph)
 		copyPos(phys, graph)
@@ -241,7 +236,7 @@ class Section {
 
 	step(): void {
 		this.world.step()
-		for(let {phys, graph} of this.cubes){
+		for(const {phys, graph} of this.cubes){
 			copyPos(phys, graph)
 		}
 	}

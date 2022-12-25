@@ -1,82 +1,63 @@
-import {addCssToPage} from "common/css_utils"
-import {tag, waitLoadEvent, waitUntil} from "common/dom_utils"
-import {makeSketchInfoButton} from "common/sketch_info_button"
-import {watchResize} from "common/watch_resize"
+import * as THREE from "three"
+import {waitDOMEvent} from "common/wait_dom_event"
+import {tag} from "common/tag"
+import * as css from "./squaremix_3d.module.scss"
+import {getBinder} from "common/binder/binder"
 
 const imageUrl = "/img/sketch/squaremix_3d.png"
 const imageWidth = 1920
 const imageHeight = 1080
 
-function doCss(): void {
-	addCssToPage("squaremix_3d", `
-body {
-	position: absolute;
-	width: 100vw;
-	height: 100vh;
-	border: 0;
-	margin: 0;
-	padding: 0;
+let img: HTMLImageElement | null = null
+let canvas: HTMLCanvasElement | null = null
 
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: center;
-	overflow: hidden;
-}
+async function init(root: HTMLElement): Promise<void> {
+	const bodyRect = root.getBoundingClientRect()
 
-canvas {
-	cursor: pointer;
-}
+	if(img){
+		img.remove()
+		img = null
+	}
+	if(canvas){
+		canvas.remove()
+		canvas = null
+	}
 
-.initial-image {
-	width: auto;
-	height: auto;
-}
-	`)
-}
-
-async function init(): Promise<void> {
-	document.querySelectorAll("canvas").forEach(el => el.remove())
-	document.querySelectorAll("img").forEach(el => el.remove())
-	let bodyRect = document.body.getBoundingClientRect()
-
-	let img = tag({tagName: "img", src: imageUrl, class: "initial-image"})
+	img = tag({tagName: "img", attrs: {src: imageUrl}, class: css.initialImage})
 	if(bodyRect.width / bodyRect.height > imageWidth / imageHeight){
 		img.style.maxWidth = "100vw"
 	} else {
 		img.style.maxHeight = "100vh"
 	}
-	document.body.appendChild(img)
-	await Promise.all([
-		waitLoadEvent(img),
-		waitUntil(() => typeof(THREE) !== "undefined")
-	])
+	root.appendChild(img)
+	await waitDOMEvent(img, "load")
 
 	let isActive = false
 
-	let imgRect = img.getBoundingClientRect()
-	let xRatio = imgRect.width / bodyRect.width
-	let yRatio = imgRect.height / bodyRect.height
-	let scene = new THREE.Scene()
-	let camera = new THREE.OrthographicCamera(-0.5 / xRatio, 0.5 / xRatio, -0.5 / yRatio, 0.5 / yRatio, 0.1, 1000)
+	const imgRect = img.getBoundingClientRect()
+	const xRatio = imgRect.width / bodyRect.width
+	const yRatio = imgRect.height / bodyRect.height
+	const scene = new THREE.Scene()
+	const camera = new THREE.OrthographicCamera(-0.5 / xRatio, 0.5 / xRatio, -0.5 / yRatio, 0.5 / yRatio, 0.1, 1000)
 	camera.position.z = 2
 	camera.position.x = camera.position.y = 0
 	camera.lookAt(0, 0, 0)
 	camera.rotateZ(Math.PI)
 
-	let squareSize = 100
-	let columnsCount = Math.ceil(imgRect.height / squareSize)
-	let rowsCount = Math.ceil(imgRect.width / squareSize)
+	const squareSize = 100
+	const columnsCount = Math.ceil(imgRect.height / squareSize)
+	const rowsCount = Math.ceil(imgRect.width / squareSize)
 
-	let renderer = new THREE.WebGLRenderer()
+	const renderer = new THREE.WebGLRenderer()
 	// renderer.setSize(rect.width, rect.height)
 	renderer.setSize(bodyRect.width, bodyRect.height)
 
-	let textureLoader = new THREE.TextureLoader()
-	let texture = await textureLoader.loadAsync(img.src)
-	let material = new THREE.MeshBasicMaterial({map: texture})
+	const textureLoader = new THREE.TextureLoader()
+	const texture = await textureLoader.loadAsync(img.src)
+	const material = new THREE.MeshBasicMaterial({map: texture})
 
-	let canvas = renderer.domElement
+	canvas = renderer.domElement
+	canvas.classList.add(css.squaremixCanvas ?? "")
 	img.after(canvas)
 	canvas.addEventListener("click", runAction)
 	img.remove()
@@ -89,7 +70,7 @@ async function init(): Promise<void> {
 		}
 		isActive = true
 		try {
-			let action = new TransformAction(columnsCount, rowsCount, scene, material, camera, () => renderer.render(scene, camera))
+			const action = new TransformAction(columnsCount, rowsCount, scene, material, camera, () => renderer.render(scene, camera))
 			await action.run()
 		} finally {
 			isActive = false
@@ -97,12 +78,10 @@ async function init(): Promise<void> {
 	}
 }
 
-export function main(): void {
-	doCss()
-	makeSketchInfoButton()
-	document.head.appendChild(tag({tagName: "script", src: "/js/three.min.js", async: "async"}))
-	init()
-	watchResize(document.body, init)
+export function main(root: HTMLElement): void {
+	init(root)
+
+	getBinder(root).onResize(() => init(root))
 }
 
 class TransformAction {
@@ -137,13 +116,13 @@ class TransformAction {
 	}
 
 	private generateColumnHeights(columns: number, rows: number): number[][] {
-		let maxDerivation = 3
+		const maxDerivation = 3
 
-		let result = new Array(columns) as number[][]
+		const result = new Array(columns) as number[][]
 		for(let c = 0; c < columns; c++){
-			let column = result[c] = new Array(rows) as number[]
+			const column = result[c] = new Array(rows) as number[]
 			for(let r = 0; r < rows; r++){
-				let derivation = maxDerivation * ((Math.random() * 2) - 1) // +- maxDerivation
+				const derivation = maxDerivation * ((Math.random() * 2) - 1) // +- maxDerivation
 				let depth = (columns - c) + derivation
 				depth = Math.min(1, Math.max(0, Math.round(depth) / columns))
 				column[r] = depth
@@ -160,7 +139,7 @@ class TransformAction {
 			}
 		}
 
-		let plane = this.makeAddSlicePlane(0, 1, 0, 1)
+		const plane = this.makeAddSlicePlane(0, 1, 0, 1)
 		plane.translateX(-0.5)
 		plane.translateY(-0.5)
 		plane.translateZ(-0.5)
@@ -176,7 +155,7 @@ class TransformAction {
 		if(height === 0){
 			return
 		}
-		let plane = this.makeAddSlicePlane(
+		const plane = this.makeAddSlicePlane(
 			1 - height, 1,
 			y / this.rowsCount, (y + 1) / this.rowsCount
 		)
@@ -189,7 +168,7 @@ class TransformAction {
 	}
 
 	private addTopPlane(x: number, y: number, height: number): void {
-		let plane = this.makeAddSlicePlane(
+		const plane = this.makeAddSlicePlane(
 			x / this.columnsCount, (x + 1) / this.columnsCount,
 			y / this.rowsCount, (y + 1) / this.rowsCount,
 			true
@@ -201,19 +180,19 @@ class TransformAction {
 	}
 
 	private makeAddSlicePlane(left: number, right: number, top: number, bottom: number, rotate = false): THREE.Object3D {
-		let geom = new THREE.PlaneGeometry()
+		const geom = new THREE.PlaneGeometry()
 		this.disposeables.push(geom)
-		let plane = new THREE.Mesh(geom, this.material)
+		const plane = new THREE.Mesh(geom, this.material)
 
-		let uv = geom.attributes.uv
+		const uv = geom.attributes.uv!
 		if(!rotate){
 			for(let i = 0; i < uv.count; i++){
 				uv.setX(i, uv.getX(i) === 0 ? left : right)
 				uv.setY(i, uv.getY(i) === 0 ? top : bottom)
 			}
 		} else {
-			let l = 1 - top, r = 1 - bottom
-			let t = left, b = right
+			const l = 1 - top, r = 1 - bottom
+			const t = left, b = right
 			for(let i = 0; i < uv.count; i++){
 				if(uv.getX(i) === 0){
 					if(uv.getY(i) === 0){
@@ -230,8 +209,8 @@ class TransformAction {
 		}
 		uv.needsUpdate = true
 
-		let xOffset = right - left, yOffset = bottom - top
-		let pos = geom.attributes.position
+		const xOffset = right - left, yOffset = bottom - top
+		const pos = geom.attributes.position!
 		for(let i = 0; i < pos.count; i++){
 			pos.setX(i, pos.getX(i) < 0 ? 0 : xOffset)
 			pos.setY(i, pos.getY(i) < 0 ? 0 : yOffset)
@@ -253,8 +232,8 @@ function forEachFrameProgress(incrementPerSecond: number, doOnFrame: (progress: 
 	return new Promise((ok, bad) => {
 		let progress = 0
 		let prevFrameStart = Date.now()
-		let wrappedHandler = () => {
-			let frameStart = Date.now()
+		const wrappedHandler = () => {
+			const frameStart = Date.now()
 			try {
 				doOnFrame(Math.min(1, progress))
 			} catch(e){
