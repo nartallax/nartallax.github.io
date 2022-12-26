@@ -18,7 +18,6 @@ export function getLocationHashBox(): WBox<string> {
 			const hash = "#" + value
 			// not sure if this check is actually making any difference
 			if(window.location.hash !== hash){
-				console.log("setting hash to " + hash)
 				window.location.hash = hash
 			}
 		})
