@@ -1,5 +1,4 @@
 import {tag} from "common/tag"
-import {waitDocumentLoaded} from "common/wait_document_loaded"
 import {waitDOMEvent} from "common/wait_dom_event"
 import {CountdownTimer} from "website/controls/countdown_timer"
 import {noSketchInfoOnSketchPageArgName} from "website/controls/sketch_page"

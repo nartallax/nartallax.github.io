@@ -1,9 +1,9 @@
 import {ContentTag, contentTags} from "website/content_tags"
-import fallingCubesThumb from "./thumbnails/falling_cubes.png"
-import starTravelThumb from "./thumbnails/star_travel.png"
-import timerThumb from "./thumbnails/timer.png"
-import squaremix3dThumb from "./thumbnails/squaremix_3d.png"
-import notImplementedThumb from "./thumbnails/not_implemented.png"
+import fallingCubesThumb from "sketches/falling_cubes/thumb.png"
+import starTravelThumb from "sketches/star_travel/thumb.png"
+import timerThumb from "sketches/timer/thumb.png"
+import squaremix3dThumb from "sketches/squaremix_3d/thumb.png"
+import notImplementedThumb from "./default_thumbnail.png"
 
 export interface SketchDescription {
 	readonly id: SketchId

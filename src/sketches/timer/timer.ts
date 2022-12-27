@@ -114,7 +114,7 @@ export function main(root: HTMLElement): void {
 	wrap.appendChild(speedBlock)
 
 
-	const addTimeBlock = tag({class: css.addTimeBlock})
+	const addTimeBlock = tag()
 	const addTimeButton = tag({tagName: "button", text: "Add time", class: css.button})
 	addTimeButton.addEventListener("click", () => {
 		timeAcc += parseTime(addTimeInput.value)
