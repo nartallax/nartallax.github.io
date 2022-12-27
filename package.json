@@ -33,7 +33,6 @@
     },
     "release": {
       "distDir": "./docs",
-      "publicUrl": "https://nartallax.github.io",
       "source": "./src/website/index.html"
     },
     "test": {
