@@ -1,3 +1,6 @@
+@import "/src/website/style/vars";
+@import "/src/website/style/common";
+
 .sketchInfoButton {
 	border-radius: 100%;
 	border: 3px solid #fff;
@@ -11,8 +14,8 @@
     height: 2rem;
     text-align: center;
     font-weight: bold;
-    font-size: 2rem;
-    color: #fff;
+    font-size: 1.25rem;
+    color: $font-color;
 
 	&:hover {
 		opacity: 1;
@@ -21,18 +24,38 @@
 }
 
 .sketchInfoBlock {
+	@extend .foreground-block;
+
 	position: absolute;
 	top: 0;
 	left: 0;
-	border: 2px solid #ddd;
-	background: #444;
-	color: #ddd;
+	color: $font-color;
 	padding: 0.5em;
 	font-weight: normal;
 	border-width: 0 2px 2px 0;
+	line-height: 1.5em;
 
 	a {
-		color: #fff;
+		@extend .text-stroke;
+
+		color: $font-color;
+		text-decoration: none;
+	}
+
+	hr {
+		height: 0;
+		border-bottom: 2px solid $font-color;
+	}
+
+	button {
+		@extend .text-stroke;
+
+		background-color: $foreground-secondary-color;
+		color: $font-color;
+		border: 0;
+		font-size: inherit;
+		padding: 0.35em 1.25em 0.25em 1.25em;
+		cursor: pointer;
 	}
 }
 

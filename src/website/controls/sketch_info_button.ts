@@ -12,7 +12,7 @@ function renderContentRefList(title: string, items: ContentReference[]): HTMLEle
 		let subline: HTMLElement
 		const text = item.description ?? item.url ?? "???"
 		if(item.url){
-			subline = tag({tagName: "a", attrs: {href: item.url}, text})
+			subline = tag({tagName: "a", attrs: {href: item.url, target: "_blank", rel: "noopener noreferrer"}, text})
 		} else {
 			subline = tag({text})
 		}
@@ -45,7 +45,7 @@ export function SketchInfoButton(d: SketchDescription): HTMLElement {
 		block.appendChild(tag({tagName: "hr"}))
 		block.appendChild(tag({tagName: "button", text: "Close", on: {click: () => block.remove()}}))
 
-		document.body.appendChild(block)
+		button.after(block)
 	})
 	document.body.appendChild(button)
 	return button

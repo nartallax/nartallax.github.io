@@ -1,10 +1,15 @@
 import {tag} from "common/tag"
 import {SketchInfoButton} from "website/controls/sketch_info_button"
+import {router} from "website/routes"
 import {SketchDescription} from "website/sketches"
 import * as css from "./sketch_page.module.scss"
 
+export const noSketchInfoOnSketchPageArgName = "no_sketch_info"
+
 export function SketchPage(sketch: SketchDescription): HTMLElement {
-	const root = tag({class: css.sketchRoot});
+	const root = tag({class: css.sketchRoot})
+
+	const noSketchInfo = router.getArgument(noSketchInfoOnSketchPageArgName);
 
 	(async() => {
 		try {
@@ -17,7 +22,7 @@ export function SketchPage(sketch: SketchDescription): HTMLElement {
 	})()
 
 	return tag({class: css.sketchRoot}, [
-		SketchInfoButton(sketch),
-		root
+		root,
+		noSketchInfo ? null : SketchInfoButton(sketch)
 	])
 }

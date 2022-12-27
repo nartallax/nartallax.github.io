@@ -39,9 +39,9 @@ function makeColorStr(mults: Color, power: number): string {
 	return `rgba(${mults.r}, ${mults.g}, ${mults.b}, ${power})`
 }
 
-export function generateRandomNebula(): SVGElement {
+export function generateRandomNebula(radius: number): SVGElement {
 	const vertex = generateWobblyCirclePoints({
-		radius: 500,
+		radius: radius,
 		vertexCount: 15,
 		wobbliness: 0.9
 	})

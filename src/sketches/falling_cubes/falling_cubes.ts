@@ -1,5 +1,7 @@
 import * as THREE from "three"
 import * as OIMO from "lib/oimo"
+import orangeSquare from "./orange_square.png"
+import {getBinder} from "common/binder/binder"
 
 function copyPos(phys: OIMO.PhysicalObjectInstance, graph: THREE.Object3D): void {
 	const q = phys.getQuaternion()
@@ -43,12 +45,11 @@ function makeHorisontalRectGeom(def: {zSize: number, xSize: number, dy: number})
 export async function main(root: HTMLElement): Promise<void> {
 	const textureLoader = new THREE.TextureLoader()
 	const scene = new THREE.Scene()
-	const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
+	const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000)
 
 	const renderer = new THREE.WebGLRenderer({
 		antialias: true
 	})
-	renderer.setSize(window.innerWidth, window.innerHeight)
 	renderer.shadowMap.enabled = true
 	renderer.shadowMap.type = THREE.PCFSoftShadowMap
 
@@ -59,7 +60,7 @@ export async function main(root: HTMLElement): Promise<void> {
 	})
 	canvas.style.cursor = "pointer"
 
-	const texture = await textureLoader.loadAsync("/img/sketch/recursive_cubes_orange_square.png")
+	const texture = await textureLoader.loadAsync(orangeSquare)
 	const cubeMaterial = new THREE.MeshLambertMaterial({map: texture})
 	const cubeGeometry = new THREE.BoxGeometry(1, 1, 1)
 
@@ -96,6 +97,10 @@ export async function main(root: HTMLElement): Promise<void> {
 
 	let section: Section | null = null
 	function start(): void {
+		camera.aspect = root.clientWidth / root.clientHeight
+		camera.updateProjectionMatrix()
+		renderer.setSize(root.clientWidth, root.clientHeight)
+
 		const currentSection = new Section(
 			cubeGeometry, cubeMaterial,
 			floorGeometry, floorMaterial,
@@ -122,6 +127,7 @@ export async function main(root: HTMLElement): Promise<void> {
 	}
 
 	start()
+	getBinder(root).onResize(() => start())
 }
 
 const sideCubeCount = 5

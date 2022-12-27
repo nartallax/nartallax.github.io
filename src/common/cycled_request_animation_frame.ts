@@ -1,14 +1,19 @@
-/** Wrapped RequestAnimationFrame, which cycles
+/** Wrapped RequestAnimationFrame, which cycles.
+ * Passes time since previous frame as argument.
  * Returns stopper function */
-export function cycledRequestAnimationFrame(handler: (timePassed: number) => void): () => void {
+export function cycledRequestAnimationFrame(handler: (delta: number) => void): () => void {
 	let stopped = false
 
-	const wrappedHandler = (diff: number) => {
+	let prevCallTime = 0
+
+	const wrappedHandler = (time: number) => {
 		if(stopped){
 			return
 		}
+		const delta = time - prevCallTime
+		prevCallTime = time
 		requestAnimationFrame(wrappedHandler)
-		handler(diff)
+		handler(delta)
 	}
 
 	requestAnimationFrame(wrappedHandler)

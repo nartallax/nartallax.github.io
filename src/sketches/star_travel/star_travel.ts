@@ -135,7 +135,7 @@ class StarTravelController {
 	private generateBackground(): SVGElement {
 		const nebulae = [] as SVGElement[]
 		for(let i = 0; i < 2; i++){
-			const nebula = generateRandomNebula()
+			const nebula = generateRandomNebula(Math.min(this.width + this.height) / 3)
 			nebulae.push(nebula)
 			const dx = (Math.random() - 0.5) * (this.width / 3)
 			const dy = (Math.random() - 0.5) * (this.height / 3)

@@ -100,7 +100,7 @@ export function main(root: HTMLElement): void {
 	})
 	wrap.appendChild(pauseBtn)
 
-	const speedBlock = tag({class: "speed-block", text: "Speed: "})
+	const speedBlock = tag({class: css.speedBlock, text: "Speed: "})
 	const speedInput = tag({tagName: "input", attrs: {type: "number", value: 1}, class: css.speedInput})
 	onAnyChange(speedInput, () => {
 		const parsed = parseFloat(speedInput.value)
@@ -114,7 +114,7 @@ export function main(root: HTMLElement): void {
 	wrap.appendChild(speedBlock)
 
 
-	const addTimeBlock = tag({class: "add-time-block"})
+	const addTimeBlock = tag({class: css.addTimeBlock})
 	const addTimeButton = tag({tagName: "button", text: "Add time", class: css.button})
 	addTimeButton.addEventListener("click", () => {
 		timeAcc += parseTime(addTimeInput.value)
@@ -129,7 +129,7 @@ export function main(root: HTMLElement): void {
 
 	wrap.appendChild(addTimeBlock)
 
-	document.body.appendChild(wrap)
+	root.appendChild(wrap)
 
 	function updateText(): void {
 		timeEl.textContent = formatTime(Math.round(timeAcc))

@@ -1,0 +1,13 @@
+@import "./vars.scss";
+
+.text-stroke {
+	color: $font-color;
+	-webkit-text-stroke-width: 1px;
+    -webkit-text-stroke-color: $font-secondary-color;
+}
+
+$foreground-gradient: linear-gradient(315deg, $foreground-secondary-color 0%, $foreground-secondary-color 15%, $foreground-primary-color 15%, $foreground-primary-color 100%);
+
+.foreground-block {
+	background: $foreground-gradient;
+}

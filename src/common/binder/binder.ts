@@ -33,6 +33,7 @@ export class BinderImpl implements Binder {
 	private watchedBoxes: null | WatchedBox[] = null
 	private resizeObserver: ResizeObserver | null = null
 	private resizeHandlers: null | (() => void)[] = null
+	private lastKnownSize: {w: number, h: number} | null = null
 	isInDom: boolean
 
 	constructor(readonly el: Node) {
@@ -167,6 +168,18 @@ export class BinderImpl implements Binder {
 		if(!this.resizeHandlers){
 			return
 		}
+		const w = this.element.clientWidth
+		const h = this.element.clientHeight
+		if(this.lastKnownSize){
+			if(this.lastKnownSize.w === w && this.lastKnownSize.h === h){
+				return
+			}
+			this.lastKnownSize.w = w
+			this.lastKnownSize.h = h
+		} else {
+			this.lastKnownSize = {w, h}
+		}
+
 		for(const handler of this.resizeHandlers){
 			handler()
 		}
@@ -175,6 +188,7 @@ export class BinderImpl implements Binder {
 	private updateResizeObserver(): void {
 		if(this.isInDom && this.resizeHandlers){
 			if(!this.resizeObserver){
+				this.lastKnownSize = {w: this.element.clientWidth, h: this.element.clientHeight}
 				this.resizeObserver = new ResizeObserver(this.callResizeHandlers.bind(this))
 				this.resizeObserver.observe(this.element)
 			}
@@ -182,6 +196,7 @@ export class BinderImpl implements Binder {
 			this.resizeObserver.unobserve(this.element)
 			this.resizeObserver.disconnect()
 			this.resizeObserver = null
+			this.lastKnownSize = null
 		}
 	}
 

@@ -1,14 +1,12 @@
 import {tag} from "common/tag"
-import {router, sketchRouteById} from "website/routes"
+import {SketchBlock} from "website/controls/sketch_block"
 import {sketchDescriptions} from "website/sketches"
+import * as css from "./main_page.module.scss"
 
 export function MainPage(): HTMLElement {
-	return tag(Object.values(sketchDescriptions)
-		.filter(sketch => !sketch.hidden)
-		.map(sketch => tag({
-			tagName: "button",
-			text: sketch.name,
-			on: {click: () => router.goTo(sketchRouteById(sketch.id))}
-		}))
+	return tag({class: css.sketchesContainer},
+		Object.values(sketchDescriptions)
+			.filter(sketch => !sketch.hidden)
+			.map(sketch => SketchBlock(sketch))
 	)
 }

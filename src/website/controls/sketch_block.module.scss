@@ -1,0 +1,70 @@
+@import "/src/website/style/common";
+@import "/src/website/style/vars";
+
+.sketch {
+	@extend .foreground-block;
+	padding: 0.35rem;
+	margin: 0.5rem;
+	cursor: pointer;
+
+	transform: scale(1.0);
+	transition: 0.25s;
+	z-index: 0;
+
+	&:hover {
+		transform: scale(1.15);
+		z-index: 1;
+	}
+
+}
+
+.sketchTitle {
+	@extend .text-stroke;
+
+	margin-left: 5px;
+}
+
+.imgContainer {
+
+	width: 300px;
+	height: 200px;
+	position: relative;
+	border: 5px solid $foreground-primary-color;
+
+	> img {
+		width: 100%;
+		height: 100%;
+		pointer-events: none;
+		position: absolute;
+	}
+}
+
+.timerBackground {
+	position: absolute;
+	background: rgba(0, 0, 0, 0.5);
+	width: 100%;
+	height: 100%;
+
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: center;
+	animation: timerBackgroundColor 1s ease-out;
+}
+
+@keyframes timerBackgroundColor {
+	0% { background: rgba(0, 0, 0, 0); }
+	100% { background: rgba(0, 0, 0, 0.5); }
+}
+
+.sketchPreview {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	border: 0;
+	z-index: -1;
+
+	&.completed {
+		z-index: 1;
+	}
+}

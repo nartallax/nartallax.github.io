@@ -1,8 +1,8 @@
-export function waitDocumentLoaded(): Promise<void> {
+export function waitDocumentLoaded(doc: Document = document): Promise<void> {
 	return new Promise(ok => {
 		const check = () => {
-			if(document.readyState === "interactive" || document.readyState === "complete"){
-				document.removeEventListener("readystatechange", check, false)
+			if(doc.readyState === "interactive" || doc.readyState === "complete"){
+				doc.removeEventListener("readystatechange", check, false)
 				ok()
 				return true
 			}
@@ -13,6 +13,6 @@ export function waitDocumentLoaded(): Promise<void> {
 			return
 		}
 
-		document.addEventListener("readystatechange", check, false)
+		doc.addEventListener("readystatechange", check, false)
 	})
 }

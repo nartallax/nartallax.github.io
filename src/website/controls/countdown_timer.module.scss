@@ -1,0 +1,23 @@
+@import "/src/website/style/common";
+
+.countdown {
+	opacity: 0.5;
+
+	circle {
+		fill: none;
+
+		&:first-child {
+			stroke: $font-color;
+		}
+
+		&:last-child {
+			stroke: $foreground-secondary-color;
+			animation: arc 1s linear;
+			rotate: -90deg;
+		}
+	}
+}
+
+@keyframes arc {
+	0% { stroke-dashoffset: 0px }
+}

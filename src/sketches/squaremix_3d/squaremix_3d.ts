@@ -3,8 +3,9 @@ import {waitDOMEvent} from "common/wait_dom_event"
 import {tag} from "common/tag"
 import * as css from "./squaremix_3d.module.scss"
 import {getBinder} from "common/binder/binder"
+import image from "./pine_forest.png"
+import {debounce} from "common/debounce"
 
-const imageUrl = "/img/sketch/squaremix_3d.png"
 const imageWidth = 1920
 const imageHeight = 1080
 
@@ -14,16 +15,13 @@ let canvas: HTMLCanvasElement | null = null
 async function init(root: HTMLElement): Promise<void> {
 	const bodyRect = root.getBoundingClientRect()
 
+	root.classList.add(css.root ?? "")
+
 	if(img){
 		img.remove()
 		img = null
 	}
-	if(canvas){
-		canvas.remove()
-		canvas = null
-	}
-
-	img = tag({tagName: "img", attrs: {src: imageUrl}, class: css.initialImage})
+	img = tag({tagName: "img", attrs: {src: image}, class: css.initialImage})
 	if(bodyRect.width / bodyRect.height > imageWidth / imageHeight){
 		img.style.maxWidth = "100vw"
 	} else {
@@ -44,7 +42,7 @@ async function init(root: HTMLElement): Promise<void> {
 	camera.lookAt(0, 0, 0)
 	camera.rotateZ(Math.PI)
 
-	const squareSize = 100
+	const squareSize = imgRect.height / 100 > 8 ? 100 : 25
 	const columnsCount = Math.ceil(imgRect.height / squareSize)
 	const rowsCount = Math.ceil(imgRect.width / squareSize)
 
@@ -56,6 +54,10 @@ async function init(root: HTMLElement): Promise<void> {
 	const texture = await textureLoader.loadAsync(img.src)
 	const material = new THREE.MeshBasicMaterial({map: texture})
 
+	if(canvas){
+		canvas.remove()
+		canvas = null
+	}
 	canvas = renderer.domElement
 	canvas.classList.add(css.squaremixCanvas ?? "")
 	img.after(canvas)
@@ -81,7 +83,7 @@ async function init(root: HTMLElement): Promise<void> {
 export function main(root: HTMLElement): void {
 	init(root)
 
-	getBinder(root).onResize(() => init(root))
+	getBinder(root).onResize(debounce(250, () => init(root)))
 }
 
 class TransformAction {
