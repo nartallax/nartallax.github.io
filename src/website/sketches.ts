@@ -3,6 +3,7 @@ import fallingCubesThumb from "sketches/falling_cubes/thumb.png"
 import starTravelThumb from "sketches/star_travel/thumb.png"
 import timerThumb from "sketches/timer/thumb.png"
 import squaremix3dThumb from "sketches/squaremix_3d/thumb.png"
+import planetsThumb from "sketches/planets/thumb.png"
 import notImplementedThumb from "./default_thumbnail.png"
 
 export interface SketchDescription {
@@ -93,6 +94,15 @@ const _sketches = {
 		tags: [contentTags.art, contentTags.svg, contentTags.css],
 		code: () => import("sketches/star_travel/star_travel"),
 		thumbnail: starTravelThumb
+	},
+
+	planets: {
+		name: "Planets",
+		description: "Stellar gravity simulation (not up to scale)",
+		date: new Date(2022, 11, 27),
+		tags: [contentTags.simulation, contentTags.svg],
+		code: () => import("sketches/planets/planets"),
+		thumbnail: planetsThumb
 	}
 }
 
