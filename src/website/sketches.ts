@@ -4,6 +4,7 @@ import starTravelThumb from "sketches/star_travel/thumb.png"
 import timerThumb from "sketches/timer/thumb.png"
 import squaremix3dThumb from "sketches/squaremix_3d/thumb.png"
 import planetsThumb from "sketches/planets/thumb.png"
+import particleToyThumb from "sketches/particle_toy/thumb.png"
 import notImplementedThumb from "./default_thumbnail.png"
 
 export interface SketchDescription {
@@ -103,6 +104,16 @@ const _sketches = {
 		tags: [contentTags.simulation, contentTags.svg],
 		code: () => import("sketches/planets/planets"),
 		thumbnail: planetsThumb
+	},
+
+	particle_toy: {
+		name: "Particle toy",
+		description: "Millions of particles processed by GPU",
+		date: new Date(2023, 0, 28),
+		tags: [contentTags.simulation, contentTags.webgl],
+		code: () => import("sketches/particle_toy/particle_toy"),
+		thumbnail: particleToyThumb,
+		hidden: true
 	}
 }
 
