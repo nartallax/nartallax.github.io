@@ -9,14 +9,13 @@ out uint newSpeedPack;
 
 void main() {
 	vec2 texcoord = gl_FragCoord.xy / DATA_TEXTURE_SIZE;
-	vec2 particlePosition = unpackXY(texture(position, texcoord).x, screenSize);
-	vec2 particleSpeed = unpackSignedXY(texture(speed, texcoord).x, SPEED_RANGE);
+	vec2 particlePosition = unpackCoords(texture(position, texcoord).x, screenSize);
+	vec2 particleSpeed = unpackSpeed(texture(speed, texcoord).x, SPEED_RANGE);
 
-	float gravityDeltaV = gravity * deltaTime;
-	vec2 newSpeed = vec2(particleSpeed.x, particleSpeed.y - gravityDeltaV);
+	// particleSpeed.y -= gravity * deltaTime;
 	if(particlePosition.y == 0.0){
-		newSpeed.y = -newSpeed.y * 0.5; // jumpyness
+		particleSpeed.y = -particleSpeed.y * 0.5; // jumpyness
 	}
 
-	newSpeedPack = packSignedXY(newSpeed, SPEED_RANGE);
+	newSpeedPack = packSpeed(particleSpeed, SPEED_RANGE);
 }

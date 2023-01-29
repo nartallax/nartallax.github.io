@@ -4,14 +4,29 @@ import {dataTextureSize, FrameBufferTexturePair, particlesCount} from "sketches/
 import {FpsCounter} from "sketches/particle_toy/fps_counter"
 import {CalcPosShader, CalcSpeedShader, DrawShader} from "sketches/particle_toy/shader"
 
-// const coordsScale = {x: 0xffff / rootSize.width, y: 0xffff / rootSize.height}
 function packSignedCoordsPair(range: {x: number, y: number}, x: number, y: number): number {
-	return (((x * (0xffff / range.x)) + 0x8fff) & 0xffff) | ((((y * (0xffff / range.y)) + 0x8fff) & 0xffff) << 0x10)
+	return (((x * (0x8000 / range.x)) + 0x8000) & 0xffff) | ((((y * (0x8000 / range.y)) + 0x8000) & 0xffff) << 0x10)
 }
+
+// const maxSignedXYRange = 36863.0
+const speedRange = 5000
 
 function packCoordsPair(range: {x: number, y: number}, x: number, y: number): number {
 	return ((x * (0xffff / range.x)) & 0xffff) | (((y * (0xffff / range.y)) & 0xffff) << 0x10)
 }
+
+// {
+// 	const s = new Set<number>()
+// 	for(let i = 0; i < 10000; i++){
+// 		let x = Math.random() * 1920
+// 		x = ((x * (0x8000 / 1920) + 0x8000) & 0xffff)
+// 		x = (x - 0x8000) * (1920 / 0x8000)
+// 		s.add(x)
+// 	}
+// 	const arr = [...s].sort((a, b) => a - b)
+// 	console.log(arr)
+// 	console.log(`${arr[0]} -> ${arr[arr.length - 1]}`)
+// }
 
 export function main(root: HTMLElement): void {
 	const canvas = document.createElement("canvas")
@@ -28,29 +43,37 @@ export function main(root: HTMLElement): void {
 	const idBuffer = makeIdBuffer(gl, particlesCount)
 	const squareBuffer = makeSquareBuffer(gl)
 	const coordsRange = {x: rootSize.width, y: rootSize.height}
-	const positionTexture = new FrameBufferTexturePair(gl, makeDataArray(i => packCoordsPair(coordsRange, i * 10, i * 20)))
+	// const coordsRange = {x: 0x8fff, y: 0x8fff}
+	// const coordsRange = {x: speedRange, y: speedRange}
+	const positionTexture = new FrameBufferTexturePair(gl, makeDataArray(() => packCoordsPair(
+		coordsRange,
+		// Math.random() * rootSize.width,
+		// Math.random() * rootSize.height
+		coordsRange.x / 2,
+		coordsRange.y / 2
+	)))
 	const speedTexture = new FrameBufferTexturePair(gl, makeDataArray(() => packSignedCoordsPair(
-		{x: 0x8fff, y: 0x8fff},
+		{x: speedRange, y: speedRange},
 		(Math.random() - 0.5) * 100,
-		(Math.random() - 0.5) * 100)
-	))
+		(Math.random() - 0.5) * 100
+	)))
 
 	const calcSpeedShader = new CalcSpeedShader(gl)
 	const calcPosShader = new CalcPosShader(gl)
 	const drawShader = new DrawShader(gl)
 
 	calcSpeedShader.use()
-	gl.uniform2f(calcSpeedShader.screenSize, rootSize.width, rootSize.height)
+	gl.uniform2f(calcSpeedShader.screenSize, coordsRange.x, coordsRange.y)
 	gl.uniform1i(calcSpeedShader.position, 0)
 	gl.uniform1i(calcSpeedShader.speed, 1)
-	gl.uniform1f(calcSpeedShader.gravity, 50)
+	gl.uniform1f(calcSpeedShader.gravity, 9.8)
 	const calcSpeedVao = GlUtils.makeBindVAO(gl)
 	gl.bindBuffer(gl.ARRAY_BUFFER, squareBuffer)
 	gl.enableVertexAttribArray(calcSpeedShader.vertex)
 	gl.vertexAttribPointer(calcSpeedShader.vertex, 2, gl.FLOAT, false, 0, 0)
 
 	calcPosShader.use()
-	gl.uniform2f(calcPosShader.screenSize, rootSize.width, rootSize.height)
+	gl.uniform2f(calcPosShader.screenSize, coordsRange.x, coordsRange.y)
 	gl.uniform1i(calcPosShader.position, 0)
 	gl.uniform1i(calcPosShader.speed, 1)
 	const calcPosVao = GlUtils.makeBindVAO(gl)
@@ -59,7 +82,7 @@ export function main(root: HTMLElement): void {
 	gl.vertexAttribPointer(calcPosShader.vertex, 2, gl.FLOAT, false, 0, 0)
 
 	drawShader.use()
-	gl.uniform2f(drawShader.screenSize, rootSize.width, rootSize.height)
+	gl.uniform2f(drawShader.screenSize, coordsRange.x, coordsRange.y)
 	gl.uniform1i(drawShader.position, 0)
 	const drawVao = GlUtils.makeBindVAO(gl)
 	gl.bindBuffer(gl.ARRAY_BUFFER, idBuffer)
@@ -126,13 +149,15 @@ export function main(root: HTMLElement): void {
 		gl.drawArrays(gl.POINTS, 0, particlesCount)
 	}
 
-	cycledRequestAnimationFrame(deltaTime => {
+	const stop = cycledRequestAnimationFrame(deltaTime => {
 		if(deltaTime > 50){
 			return
 		}
 
 		drawFrame(deltaTime / 1000)
 	})
+
+	setTimeout(stop, 5000)
 }
 
 function makeDataArray(getValue: (index: number) => number): Uint32Array {

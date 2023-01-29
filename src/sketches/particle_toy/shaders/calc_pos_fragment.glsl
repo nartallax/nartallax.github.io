@@ -15,16 +15,15 @@ void main() {
 	vec2 newPosition;
 
 	uint index = fragCoordToIndex(gl_FragCoord.xy);
-	if(index >= firstMovedParticleIndex && index <= lastMovedParticleIndex){
-		newPosition = screenSize / 2.0;
-	} else {
-		vec2 particlePosition = unpackXY(texture(position, texcoord).x, screenSize);
-		vec2 particleSpeed = unpackSignedXY(texture(speed, texcoord).x, SPEED_RANGE);
+	// if(index >= firstMovedParticleIndex && index <= lastMovedParticleIndex){
+	// 	newPosition = screenSize / 2.0;
+	// } else {
+		vec2 particlePosition = unpackCoords(texture(position, texcoord).x, screenSize);
+		vec2 particleSpeed = unpackSpeed(texture(speed, texcoord).x, SPEED_RANGE);
 
 		newPosition = particlePosition + (particleSpeed * deltaTime);
-		// newPosition = mod(newPosition, screenSize);
 		newPosition = min(max(newPosition, vec2(0.0, 0.0)), screenSize);
-	}
+	// }
 
-	newPositionPack = packXY(newPosition, screenSize);
+	newPositionPack = packCoords(newPosition, screenSize);
 }
