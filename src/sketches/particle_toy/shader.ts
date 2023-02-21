@@ -1,10 +1,8 @@
 import glslUtils from "./shaders/utils.glsl"
 import drawFragmentShaderCode from "./shaders/draw_fragment.glsl"
 import drawVertexShaderCode from "./shaders/draw_vertex.glsl"
-import calcPosVertexShaderCode from "./shaders/calc_pos_vertex.glsl"
-import calcPosFragmentShaderCode from "./shaders/calc_pos_fragment.glsl"
-import calcSpeedVertexShaderCode from "./shaders/calc_speed_vertex.glsl"
-import calcSpeedFragmentShaderCode from "./shaders/calc_speed_fragment.glsl"
+import dataVertexShaderCode from "./shaders/data_vertex.glsl"
+import dataFragmentShaderCode from "./shaders/data_fragment.glsl"
 import {GlUtils} from "common/gl_utils"
 import {dataTextureSize} from "sketches/particle_toy/data_texture"
 
@@ -44,55 +42,50 @@ type Uniform = WebGLUniformLocation | null
 
 export class DrawShader extends Shader {
 
-	readonly position: Uniform
+	readonly positionX: Uniform
+	readonly positionY: Uniform
 	readonly id: Attrib
 	readonly screenSize: Uniform
 
 	constructor(gl: WebGL2RenderingContext) {
 		super(gl, drawVertexShaderCode, drawFragmentShaderCode)
-		this.position = gl.getUniformLocation(this.program, "position")
+		this.positionX = gl.getUniformLocation(this.program, "positionX")
+		this.positionY = gl.getUniformLocation(this.program, "positionY")
 		this.id = gl.getAttribLocation(this.program, "id")
 		this.screenSize = gl.getUniformLocation(this.program, "screenSize")
 	}
 }
 
-export class CalcPosShader extends Shader {
+export class DataShader extends Shader {
 
+	// textures
+	readonly positionX: Uniform
+	readonly positionY: Uniform
+	readonly speedX: Uniform
+	readonly speedY: Uniform
+
+	// uniforms
 	readonly screenSize: Uniform
-	readonly position: Uniform
-	readonly speed: Uniform
-	readonly vertex: Attrib
 	readonly deltaTime: Uniform
+	readonly gravity: Uniform
 	readonly firstMovedParticleIndex: Uniform
 	readonly lastMovedParticleIndex: Uniform
 
+	// attribs
+	readonly vertex: Attrib
+
 	constructor(gl: WebGL2RenderingContext) {
-		super(gl, calcPosVertexShaderCode, calcPosFragmentShaderCode)
+		super(gl, dataVertexShaderCode, dataFragmentShaderCode)
 		this.screenSize = gl.getUniformLocation(this.program, "screenSize")
-		this.position = gl.getUniformLocation(this.program, "position")
-		this.speed = gl.getUniformLocation(this.program, "speed")
+		this.positionX = gl.getUniformLocation(this.program, "positionX")
+		this.positionY = gl.getUniformLocation(this.program, "positionY")
+		this.speedX = gl.getUniformLocation(this.program, "speedX")
+		this.speedY = gl.getUniformLocation(this.program, "speedY")
 		this.deltaTime = gl.getUniformLocation(this.program, "deltaTime")
 		this.vertex = gl.getAttribLocation(this.program, "vertex")
 		this.firstMovedParticleIndex = gl.getUniformLocation(this.program, "firstMovedParticleIndex")
 		this.lastMovedParticleIndex = gl.getUniformLocation(this.program, "lastMovedParticleIndex")
-	}
-}
-
-export class CalcSpeedShader extends Shader {
-	readonly screenSize: Uniform
-	readonly position: Uniform
-	readonly speed: Uniform
-	readonly vertex: Attrib
-	readonly deltaTime: Uniform
-	readonly gravity: Uniform
-
-	constructor(gl: WebGL2RenderingContext) {
-		super(gl, calcSpeedVertexShaderCode, calcSpeedFragmentShaderCode)
-		this.screenSize = gl.getUniformLocation(this.program, "screenSize")
-		this.position = gl.getUniformLocation(this.program, "position")
-		this.speed = gl.getUniformLocation(this.program, "speed")
-		this.deltaTime = gl.getUniformLocation(this.program, "deltaTime")
 		this.gravity = gl.getUniformLocation(this.program, "gravity")
-		this.vertex = gl.getAttribLocation(this.program, "vertex")
 	}
+
 }

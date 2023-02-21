@@ -1,12 +1,11 @@
-uniform usampler2D positions;
-uniform vec2 coordsScale;
+uniform usampler2D positionX;
+uniform usampler2D positionY;
 uniform vec2 screenSize;
 in uint id;
 
 void main(){
-  uint coordsPack = getUintFromTexture(positions, id);
-  vec2 absCoords = unpackCoords(coordsPack, screenSize);
+  vec2 absCoords = getFloatPairByIndex(positionX, positionY, id, screenSize);
   vec4 screenCoords = absCoordsIntoScreenCoords(absCoords, screenSize);
 	gl_Position = screenCoords;
-  gl_PointSize = 1.0;
+  gl_PointSize = 2.0;
 }

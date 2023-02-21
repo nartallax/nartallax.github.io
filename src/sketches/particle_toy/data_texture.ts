@@ -26,17 +26,9 @@ function createDataTexture(gl: WebGL2RenderingContext, data: Uint32Array): WebGL
 	return tex
 }
 
-function createFramebuffer(gl: WebGL2RenderingContext, tex: WebGLTexture): WebGLFramebuffer {
-	const fb = gl.createFramebuffer()
-	if(!fb){
-		throw new Error("Cannot create webgl framebuffer")
-	}
-	gl.bindFramebuffer(gl.FRAMEBUFFER, fb)
-	gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, tex, 0)
-	return fb
-}
+export type DataTexture = DataTextureSingle | DataTexturePair
 
-export class DataTexture {
+export class DataTextureSingle {
 
 	private readonly _texture: WebGLTexture
 
@@ -48,7 +40,7 @@ export class DataTexture {
 		return this._texture
 	}
 
-	get inputTexture(): WebGLTexture {
+	get receivingTexture(): WebGLTexture {
 		return this._texture
 	}
 
@@ -68,49 +60,11 @@ export class DataTexturePair {
 		return this.aIsActive ? this.a : this.b
 	}
 
-	get inputTexture(): WebGLTexture {
+	get receivingTexture(): WebGLTexture {
 		return this.aIsActive ? this.b : this.a
 	}
 
 	swap(): void {
 		this.aIsActive = !this.aIsActive
 	}
-}
-
-export class FrameBufferTexturePair {
-	private readonly _textureA: WebGLTexture
-	private readonly _textureB: WebGLTexture
-	private readonly _framebufferA: WebGLFramebuffer
-	private readonly _framebufferB: WebGLFramebuffer
-	private activeA = true
-
-	constructor(private readonly gl: WebGL2RenderingContext, data: Uint32Array) {
-		this._textureA = createDataTexture(gl, data)
-		this._textureB = createDataTexture(gl, data)
-		this._framebufferA = createFramebuffer(gl, this._textureA)
-		this._framebufferB = createFramebuffer(gl, this._textureB)
-	}
-
-	get texture(): WebGLTexture {
-		return this.activeA ? this._textureA : this._textureB
-	}
-
-	get framebuffer(): WebGLFramebuffer {
-		// inverted logic here - if A is active, then we cannot write into A
-		return this.activeA ? this._framebufferB : this._framebufferA
-	}
-
-	swap(): void {
-		this.activeA = !this.activeA
-	}
-
-	withFramebufferActive<T>(action: () => T): T {
-		try {
-			this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.framebuffer)
-			return action()
-		} finally {
-			this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null)
-		}
-	}
-
 }
