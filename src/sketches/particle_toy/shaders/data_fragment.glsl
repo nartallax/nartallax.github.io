@@ -20,8 +20,8 @@ void main(){
 	vec2 texcoord = gl_FragCoord.xy / DATA_TEXTURE_SIZE;
 	uint index = fragCoordToIndex(gl_FragCoord.xy);
 
-	vec2 position = getUFloatPairByCoords(positionX, positionY, texcoord, screenSize);
-	vec2 speed = getSFloatPairByCoords(speedX, speedY, texcoord, SPEED_RANGE);
+	vec2 position = getFloatPairByCoords(positionX, positionY, texcoord, screenSize);
+	vec2 speed = getFloatPairByCoords(speedX, speedY, texcoord, SPEED_RANGE);
 
 	if(index >= firstMovedParticleIndex && index <= lastMovedParticleIndex){
 		position = screenSize / 2.0;
@@ -35,10 +35,10 @@ void main(){
 		speed.y = -speed.y * 0.5; // jumpyness
 	}
 
-	outPosX = encodeUFloat(position.x, screenSize.x);
-    outPosY = encodeUFloat(position.y, screenSize.y);
-    outSpeedX = encodeSFloat(speed.x, SPEED_RANGE);
-    outSpeedY = encodeSFloat(speed.y, SPEED_RANGE);
+	outPosX = encodeFloat(position.x, screenSize.x);
+    outPosY = encodeFloat(position.y, screenSize.y);
+    outSpeedX = encodeFloat(speed.x, SPEED_RANGE);
+    outSpeedY = encodeFloat(speed.y, SPEED_RANGE);
 }
 
 

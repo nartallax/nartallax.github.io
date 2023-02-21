@@ -38,12 +38,8 @@ function bindTexturesToInputBuffers(gl: WebGL2RenderingContext, textures: DataTe
 	}
 }
 
-function encodeUFloat(value: number, range: number): number {
-	return Math.floor((value / range) * 0x7fffffff)
-}
-
-function encodeSFloat(value: number, range: number): number {
-	return encodeUFloat(value, range) + 0x7fffffff
+function encodeFloat(value: number, range: number): number {
+	return Math.floor((value / range) * 0x7fffffff) + 0x7fffffff
 }
 
 export function main(root: HTMLElement): void {
@@ -61,10 +57,10 @@ export function main(root: HTMLElement): void {
 	const idBuffer = makeIdBuffer(gl, particlesCount)
 	const squareBuffer = makeSquareBuffer(gl)
 	const coordsRange = {x: rootSize.width, y: rootSize.height}
-	const positionXTexture = new DataTexturePair(gl, makeDataArray(() => encodeUFloat(Math.random() * coordsRange.x, coordsRange.x)))
-	const positionYTexture = new DataTexturePair(gl, makeDataArray(() => encodeUFloat(Math.random() * coordsRange.y, coordsRange.y)))
-	const speedXTexture = new DataTexturePair(gl, makeDataArray(() => encodeSFloat((Math.random() - 0.5) * 100, speedRange)))
-	const speedYTexture = new DataTexturePair(gl, makeDataArray(() => encodeSFloat((Math.random() - 0.5) * 100, speedRange)))
+	const positionXTexture = new DataTexturePair(gl, makeDataArray(() => encodeFloat(Math.random() * coordsRange.x, coordsRange.x)))
+	const positionYTexture = new DataTexturePair(gl, makeDataArray(() => encodeFloat(Math.random() * coordsRange.y, coordsRange.y)))
+	const speedXTexture = new DataTexturePair(gl, makeDataArray(() => encodeFloat((Math.random() - 0.5) * 100, speedRange)))
+	const speedYTexture = new DataTexturePair(gl, makeDataArray(() => encodeFloat((Math.random() - 0.5) * 100, speedRange)))
 
 	const dataShader = new DataShader(gl)
 	const drawShader = new DrawShader(gl)
