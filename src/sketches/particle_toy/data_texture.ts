@@ -48,6 +48,33 @@ export class DataTexture {
 		return this._texture
 	}
 
+	get inputTexture(): WebGLTexture {
+		return this._texture
+	}
+
+}
+
+export class DataTexturePair {
+	private readonly a: WebGLTexture
+	private readonly b: WebGLTexture
+	private aIsActive = true
+
+	constructor(gl: WebGL2RenderingContext, data: Uint32Array) {
+		this.a = createDataTexture(gl, data)
+		this.b = createDataTexture(gl, data)
+	}
+
+	get texture(): WebGLTexture {
+		return this.aIsActive ? this.a : this.b
+	}
+
+	get inputTexture(): WebGLTexture {
+		return this.aIsActive ? this.b : this.a
+	}
+
+	swap(): void {
+		this.aIsActive = !this.aIsActive
+	}
 }
 
 export class FrameBufferTexturePair {

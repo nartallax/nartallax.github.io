@@ -4,6 +4,10 @@ import {dataTextureSize, FrameBufferTexturePair, particlesCount} from "sketches/
 import {FpsCounter} from "sketches/particle_toy/fps_counter"
 import {CalcPosShader, CalcSpeedShader, DrawShader} from "sketches/particle_toy/shader"
 
+// reading:
+// https://webglfundamentals.org/webgl/lessons/webgl-gpgpu.html
+// https://developer.mozilla.org/en-US/docs/Web/API/WEBGL_draw_buffers
+
 function packSignedCoordsPair(range: {x: number, y: number}, x: number, y: number): number {
 	return (((x * (0x8000 / range.x)) + 0x8000) & 0xffff) | ((((y * (0x8000 / range.y)) + 0x8000) & 0xffff) << 0x10)
 }
@@ -15,18 +19,22 @@ function packCoordsPair(range: {x: number, y: number}, x: number, y: number): nu
 	return ((x * (0xffff / range.x)) & 0xffff) | (((y * (0xffff / range.y)) & 0xffff) << 0x10)
 }
 
-// {
-// 	const s = new Set<number>()
-// 	for(let i = 0; i < 10000; i++){
-// 		let x = Math.random() * 1920
-// 		x = ((x * (0x8000 / 1920) + 0x8000) & 0xffff)
-// 		x = (x - 0x8000) * (1920 / 0x8000)
-// 		s.add(x)
-// 	}
-// 	const arr = [...s].sort((a, b) => a - b)
-// 	console.log(arr)
-// 	console.log(`${arr[0]} -> ${arr[arr.length - 1]}`)
-// }
+function withFramebuffer<T>(gl: WebGL2RenderingContext, action: () => T): T {
+	try {
+		const fb = gl.createFramebuffer()
+		gl.bindFramebuffer(gl.FRAMEBUFFER, fb)
+		return action()
+	} finally {
+		gl.bindFramebuffer(gl.FRAMEBUFFER, null)
+	}
+}
+
+function bindTexturesToOutputBuffers(gl: WebGL2RenderingContext, textures: WebGLTexture[]): void {
+	for(let i = 0; i < textures.length; i++){
+		const texture = textures[i]!
+		gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0 + i, gl.TEXTURE_2D, texture, 0)
+	}
+}
 
 export function main(root: HTMLElement): void {
 	const canvas = document.createElement("canvas")
@@ -43,8 +51,6 @@ export function main(root: HTMLElement): void {
 	const idBuffer = makeIdBuffer(gl, particlesCount)
 	const squareBuffer = makeSquareBuffer(gl)
 	const coordsRange = {x: rootSize.width, y: rootSize.height}
-	// const coordsRange = {x: 0x8fff, y: 0x8fff}
-	// const coordsRange = {x: speedRange, y: speedRange}
 	const positionTexture = new FrameBufferTexturePair(gl, makeDataArray(() => packCoordsPair(
 		coordsRange,
 		// Math.random() * rootSize.width,
