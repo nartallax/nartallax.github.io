@@ -20,20 +20,25 @@ void main(){
 	vec2 texcoord = gl_FragCoord.xy / DATA_TEXTURE_SIZE;
 	uint index = fragCoordToIndex(gl_FragCoord.xy);
 
-	vec2 position = getFloatPairByCoords(positionX, positionY, texcoord, screenSize);
-	vec2 speed = getSignedFloatPairByCoords(speedX, speedY, texcoord, SPEED_RANGE);
+	vec2 position = getUFloatPairByCoords(positionX, positionY, texcoord, screenSize);
+	vec2 speed = getSFloatPairByCoords(speedX, speedY, texcoord, SPEED_RANGE);
 
-	position = position + (speed * deltaTime);
-	position = min(max(position, vec2(0.0, 0.0)), screenSize);
+	if(index >= firstMovedParticleIndex && index <= lastMovedParticleIndex){
+		position = screenSize / 2.0;
+	} else {
+		position = position + (speed * deltaTime);
+		position = min(max(position, vec2(0.0, 0.0)), screenSize);
+	}
 
-	// if(position.y == 0.0){
-	// 	speed.y = -speed.y * 0.5; // jumpyness
-	// }
+	speed.y -= gravity * deltaTime;
+	if(position.y == 0.0){
+		speed.y = -speed.y * 0.5; // jumpyness
+	}
 
-	outPosX = encodeFloat(position.x, screenSize.x);
-    outPosY = encodeFloat(position.y, screenSize.y);
-    outSpeedX = encodeSignedFloat(speed.x, SPEED_RANGE);
-    outSpeedY = encodeSignedFloat(speed.y, SPEED_RANGE);
+	outPosX = encodeUFloat(position.x, screenSize.x);
+    outPosY = encodeUFloat(position.y, screenSize.y);
+    outSpeedX = encodeSFloat(speed.x, SPEED_RANGE);
+    outSpeedY = encodeSFloat(speed.y, SPEED_RANGE);
 }
 
 
@@ -44,9 +49,9 @@ void main(){
 // 	vec2 newPosition;
 
 // 	uint index = fragCoordToIndex(gl_FragCoord.xy);
-// 	// if(index >= firstMovedParticleIndex && index <= lastMovedParticleIndex){
-// 	// 	newPosition = screenSize / 2.0;
-// 	// } else {
+	// if(index >= firstMovedParticleIndex && index <= lastMovedParticleIndex){
+	// 	newPosition = screenSize / 2.0;
+	// } else {
 // 		vec2 particlePosition = unpackCoords(texture(position, texcoord).x, screenSize);
 // 		vec2 particleSpeed = unpackSpeed(texture(speed, texcoord).x, SPEED_RANGE);
 

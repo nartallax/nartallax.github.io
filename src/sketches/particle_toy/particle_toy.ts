@@ -38,12 +38,12 @@ function bindTexturesToInputBuffers(gl: WebGL2RenderingContext, textures: DataTe
 	}
 }
 
-function encodeFloat(value: number, range: number): number {
+function encodeUFloat(value: number, range: number): number {
 	return Math.floor((value / range) * 0x7fffffff)
 }
 
-function encodeSignedFloat(value: number, range: number): number {
-	return encodeFloat(value, range) + 0x7fffffff
+function encodeSFloat(value: number, range: number): number {
+	return encodeUFloat(value, range) + 0x7fffffff
 }
 
 export function main(root: HTMLElement): void {
@@ -61,10 +61,10 @@ export function main(root: HTMLElement): void {
 	const idBuffer = makeIdBuffer(gl, particlesCount)
 	const squareBuffer = makeSquareBuffer(gl)
 	const coordsRange = {x: rootSize.width, y: rootSize.height}
-	const positionXTexture = new DataTexturePair(gl, makeDataArray(() => encodeFloat(coordsRange.x / 2, coordsRange.x)))
-	const positionYTexture = new DataTexturePair(gl, makeDataArray(() => encodeFloat(coordsRange.y / 2, coordsRange.y)))
-	const speedXTexture = new DataTexturePair(gl, makeDataArray(() => encodeSignedFloat((Math.random() - 0.5) * 100, speedRange)))
-	const speedYTexture = new DataTexturePair(gl, makeDataArray(() => encodeSignedFloat((Math.random() - 0.5) * 100, speedRange)))
+	const positionXTexture = new DataTexturePair(gl, makeDataArray(() => encodeUFloat(Math.random() * coordsRange.x, coordsRange.x)))
+	const positionYTexture = new DataTexturePair(gl, makeDataArray(() => encodeUFloat(Math.random() * coordsRange.y, coordsRange.y)))
+	const speedXTexture = new DataTexturePair(gl, makeDataArray(() => encodeSFloat((Math.random() - 0.5) * 100, speedRange)))
+	const speedYTexture = new DataTexturePair(gl, makeDataArray(() => encodeSFloat((Math.random() - 0.5) * 100, speedRange)))
 
 	const dataShader = new DataShader(gl)
 	const drawShader = new DrawShader(gl)
@@ -111,6 +111,8 @@ export function main(root: HTMLElement): void {
 			dataShader.use()
 			gl.viewport(0, 0, dataTextureSize, dataTextureSize)
 			gl.uniform1f(dataShader.deltaTime, deltaTime)
+			gl.uniform1ui(dataShader.firstMovedParticleIndex, firstMovedParticleIndex)
+			gl.uniform1ui(dataShader.lastMovedParticleIndex, lastMovedParticleIndex)
 
 			bindTexturesToInputBuffers(gl, dataTextures)
 			bindTexturesToOutputBuffers(gl, dataTextures)
@@ -134,15 +136,13 @@ export function main(root: HTMLElement): void {
 		gl.drawArrays(gl.POINTS, 0, particlesCount)
 	}
 
-	const stop = cycledRequestAnimationFrame(deltaTime => {
-		if(deltaTime > 50){
+	cycledRequestAnimationFrame(deltaTime => {
+		if(deltaTime > 250){
 			return
 		}
 
 		drawFrame(deltaTime / 1000)
 	})
-
-	setTimeout(stop, 5000)
 }
 
 function makeDataArray(getValue: (index: number) => number): Uint32Array {

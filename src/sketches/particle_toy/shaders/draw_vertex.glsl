@@ -4,8 +4,8 @@ uniform vec2 screenSize;
 in uint id;
 
 void main(){
-  vec2 absCoords = getFloatPairByIndex(positionX, positionY, id, screenSize);
+  vec2 absCoords = getUFloatPairByIndex(positionX, positionY, id, screenSize);
   vec4 screenCoords = absCoordsIntoScreenCoords(absCoords, screenSize);
 	gl_Position = screenCoords;
-  gl_PointSize = 2.0;
+  gl_PointSize = 1.0;
 }
