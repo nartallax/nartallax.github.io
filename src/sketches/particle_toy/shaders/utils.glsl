@@ -37,6 +37,14 @@ uint fragCoordToIndex(vec2 fragCoord){
   return uint(fragCoord.x) + uint(fragCoord.y * DATA_TEXTURE_SIZE);
 }
 
-#define randomUint(seed) ((((seed * 505339u) % 299099u) * 982231u) % 116833u) * 683201u
-#define randomFloatFromUint(seed) normalizeRandomUint(randomUint(seed))
+// A single iteration of Bob Jenkins' One-At-A-Time hashing algorithm.
+uint hash(uint x) {
+    x += ( x << 10u );
+    x ^= ( x >>  6u );
+    x += ( x <<  3u );
+    x ^= ( x >> 11u );
+    x += ( x << 15u );
+    return x;
+}
+
 #define normalizeRandomUint(value) float(value % 0xffffffu) / float(0xffffffu)

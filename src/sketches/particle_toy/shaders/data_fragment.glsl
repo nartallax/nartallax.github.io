@@ -27,7 +27,7 @@ layout(location = 3) out uint outSpeedY;
 
 void moveBySprayFn(inout vec2 position, inout vec2 speed, uint index, vec2 sprayPosition, float direction, float power, float spread){
 	position = sprayPosition;
-	uint rnd = randomUint(index);
+	uint rnd = hash(index);
 	direction += spread * (normalizeRandomUint(rnd) - 0.5);
 	power += (power / 3.0) * (normalizeRandomUint(rnd * 134u) - 0.5);
 	speed = vec2(cos(direction) * power, sin(direction) * power);

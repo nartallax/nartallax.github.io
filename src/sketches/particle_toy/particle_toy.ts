@@ -49,9 +49,9 @@ export function main(root: HTMLElement): void {
 		x: coordsRange.x * (3 / 4),
 		y: coordsRange.y / 2,
 		direction: Math.PI * (3 / 4),
-		intensity: particlesCount / 2000,
+		intensity: particlesCount / 20000,
 		power: 50,
-		spread: Math.PI / 16
+		spread: Math.PI / 2
 	}
 
 	const dataTextures = [positionXTexture, positionYTexture, speedXTexture, speedYTexture]
