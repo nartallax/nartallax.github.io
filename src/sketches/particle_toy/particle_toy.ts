@@ -3,44 +3,13 @@ import {GlUtils} from "common/gl_utils"
 import {DataTexture, DataTexturePair, dataTextureSize, particlesCount} from "sketches/particle_toy/data_texture"
 import {FpsCounter} from "sketches/particle_toy/fps_counter"
 import {DataShader, DrawShader} from "sketches/particle_toy/shader"
+import {particlesMovedPerSecond, sprays, uploadSprays, zeroSpray} from "sketches/particle_toy/sprays"
 
 // reading:
 // https://webglfundamentals.org/webgl/lessons/webgl-gpgpu.html
 // https://developer.mozilla.org/en-US/docs/Web/API/WEBGL_draw_buffers
 
 const speedRange = 5000
-
-function withFramebuffer<T>(gl: WebGL2RenderingContext, action: () => T): T {
-	try {
-		const fb = gl.createFramebuffer()
-		gl.bindFramebuffer(gl.FRAMEBUFFER, fb)
-		return action()
-	} finally {
-		gl.bindFramebuffer(gl.FRAMEBUFFER, null)
-	}
-}
-
-function bindTexturesToOutputBuffers(gl: WebGL2RenderingContext, textures: DataTexture[]): void {
-	const drawBuffersInput: number[] = []
-	for(let i = 0; i < textures.length; i++){
-		const texture = textures[i]!
-		gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0 + i, gl.TEXTURE_2D, texture.receivingTexture, 0)
-		drawBuffersInput.push(gl.COLOR_ATTACHMENT0 + i)
-	}
-	gl.drawBuffers(drawBuffersInput)
-}
-
-function bindTexturesToInputBuffers(gl: WebGL2RenderingContext, textures: DataTexture[]): void {
-	for(let i = 0; i < textures.length; i++){
-		const texture = textures[i]!
-		gl.activeTexture(gl.TEXTURE0 + i)
-		gl.bindTexture(gl.TEXTURE_2D, texture.texture)
-	}
-}
-
-function encodeFloat(value: number, range: number): number {
-	return Math.floor((value / range) * 0x7fffffff) + 0x7fffffff
-}
 
 export function main(root: HTMLElement): void {
 	const canvas = document.createElement("canvas")
@@ -65,6 +34,26 @@ export function main(root: HTMLElement): void {
 	const dataShader = new DataShader(gl)
 	const drawShader = new DrawShader(gl)
 
+	sprays[0] = {
+		...zeroSpray,
+		x: coordsRange.x / 4,
+		y: coordsRange.y / 2,
+		direction: Math.PI / 4,
+		intensity: particlesCount / 10000,
+		power: 100,
+		spread: Math.PI / 16
+	}
+
+	sprays[1] = {
+		...zeroSpray,
+		x: coordsRange.x * (3 / 4),
+		y: coordsRange.y / 2,
+		direction: Math.PI * (3 / 4),
+		intensity: particlesCount / 2000,
+		power: 50,
+		spread: Math.PI / 16
+	}
+
 	const dataTextures = [positionXTexture, positionYTexture, speedXTexture, speedYTexture]
 	dataShader.use()
 	gl.uniform2f(dataShader.screenSize, coordsRange.x, coordsRange.y)
@@ -72,7 +61,9 @@ export function main(root: HTMLElement): void {
 	gl.uniform1i(dataShader.positionY, 1)
 	gl.uniform1i(dataShader.speedX, 2)
 	gl.uniform1i(dataShader.speedY, 3)
-	gl.uniform1f(dataShader.gravity, 9.8)
+	gl.uniform1f(dataShader.gravity, 9.8) // TODO: config
+	gl.uniform1f(dataShader.bounce, 0.5) // TODO: config
+	uploadSprays(gl, dataShader) // TODO: config
 	const dataShaderVao = GlUtils.makeBindVAO(gl)
 	gl.bindBuffer(gl.ARRAY_BUFFER, squareBuffer)
 	gl.enableVertexAttribArray(dataShader.vertex)
@@ -89,14 +80,13 @@ export function main(root: HTMLElement): void {
 	gl.vertexAttribIPointer(drawShader.id, 1, gl.UNSIGNED_INT, 0, 0)
 
 	let particleMovementPointer = 0
-	const particlesMovedPerSecond = particlesCount / 10
 
 	const fpsCounter = new FpsCounter()
 	function drawFrame(deltaTime: number): void {
 		fpsCounter.recordFrame(deltaTime)
 
 		const firstMovedParticleIndex = particleMovementPointer
-		const lastMovedParticleIndex = firstMovedParticleIndex + Math.floor(particlesMovedPerSecond * deltaTime)
+		const lastMovedParticleIndex = firstMovedParticleIndex + Math.floor(particlesMovedPerSecond)
 		particleMovementPointer = lastMovedParticleIndex
 		if(particleMovementPointer >= particlesCount){
 			particleMovementPointer = 0
@@ -165,4 +155,36 @@ function makeSquareBuffer(gl: WebGL2RenderingContext): WebGLBuffer {
 	gl.bindBuffer(gl.ARRAY_BUFFER, squareBuffer)
 	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1]), gl.STATIC_DRAW)
 	return squareBuffer
+}
+
+function withFramebuffer<T>(gl: WebGL2RenderingContext, action: () => T): T {
+	try {
+		const fb = gl.createFramebuffer()
+		gl.bindFramebuffer(gl.FRAMEBUFFER, fb)
+		return action()
+	} finally {
+		gl.bindFramebuffer(gl.FRAMEBUFFER, null)
+	}
+}
+
+function bindTexturesToOutputBuffers(gl: WebGL2RenderingContext, textures: DataTexture[]): void {
+	const drawBuffersInput: number[] = []
+	for(let i = 0; i < textures.length; i++){
+		const texture = textures[i]!
+		gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0 + i, gl.TEXTURE_2D, texture.receivingTexture, 0)
+		drawBuffersInput.push(gl.COLOR_ATTACHMENT0 + i)
+	}
+	gl.drawBuffers(drawBuffersInput)
+}
+
+function bindTexturesToInputBuffers(gl: WebGL2RenderingContext, textures: DataTexture[]): void {
+	for(let i = 0; i < textures.length; i++){
+		const texture = textures[i]!
+		gl.activeTexture(gl.TEXTURE0 + i)
+		gl.bindTexture(gl.TEXTURE_2D, texture.texture)
+	}
+}
+
+function encodeFloat(value: number, range: number): number {
+	return Math.floor((value / range) * 0x7fffffff) + 0x7fffffff
 }

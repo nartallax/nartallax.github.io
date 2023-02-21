@@ -5,6 +5,13 @@ uniform uint firstMovedParticleIndex;
 uniform uint lastMovedParticleIndex;
 
 uniform float gravity;
+uniform float bounce;
+uniform vec4 sprayX;
+uniform vec4 sprayY;
+uniform vec4 sprayDirection;
+uniform vec4 sprayPower;
+uniform vec4 spraySpread;
+uniform uvec4 sprayIntensity;
 
 uniform usampler2D positionX;
 uniform usampler2D positionY;
@@ -16,6 +23,16 @@ layout(location = 1) out uint outPosY;
 layout(location = 2) out uint outSpeedX;
 layout(location = 3) out uint outSpeedY;
 
+#define moveBySpray(pos, spd, index, sprayIndex) moveBySprayFn(pos, spd, index, vec2(sprayX[sprayIndex], sprayY[sprayIndex]), sprayDirection[sprayIndex], sprayPower[sprayIndex], spraySpread[sprayIndex])
+
+void moveBySprayFn(inout vec2 position, inout vec2 speed, uint index, vec2 sprayPosition, float direction, float power, float spread){
+	position = sprayPosition;
+	uint rnd = randomUint(index);
+	direction += spread * (normalizeRandomUint(rnd) - 0.5);
+	power += (power / 3.0) * (normalizeRandomUint(rnd * 134u) - 0.5);
+	speed = vec2(cos(direction) * power, sin(direction) * power);
+}
+
 void main(){
 	vec2 texcoord = gl_FragCoord.xy / DATA_TEXTURE_SIZE;
 	uint index = fragCoordToIndex(gl_FragCoord.xy);
@@ -23,56 +40,48 @@ void main(){
 	vec2 position = getFloatPairByCoords(positionX, positionY, texcoord, screenSize);
 	vec2 speed = getFloatPairByCoords(speedX, speedY, texcoord, SPEED_RANGE);
 
-	if(index >= firstMovedParticleIndex && index <= lastMovedParticleIndex){
-		position = screenSize / 2.0;
-	} else {
-		position = position + (speed * deltaTime);
-		position = min(max(position, vec2(0.0, 0.0)), screenSize);
+	uint sprayOffset = index - firstMovedParticleIndex;
+	if(sprayOffset >= 0u){
+		if(sprayOffset < sprayIntensity[0]){
+			moveBySpray(position, speed, index, 0);
+		} else {
+			sprayOffset -= sprayIntensity[0];
+			if(sprayOffset < sprayIntensity[1]){
+				moveBySpray(position, speed, index, 1);
+			} else {
+				sprayOffset -= sprayIntensity[1];
+				if(sprayOffset < sprayIntensity[2]){
+					moveBySpray(position, speed, index, 2);
+				} else {
+					sprayOffset -= sprayIntensity[2];
+					if(sprayOffset < sprayIntensity[3]){
+						moveBySpray(position, speed, index, 3);
+					}
+				}
+			}
+		}
+	}
+
+	position = position + (speed * deltaTime);
+	if(position.x < 0.0){
+		position.x = 0.01;
+		speed.x = -speed.x * bounce;
+	} else if(position.x > screenSize.x){
+		position.x = screenSize.x - 0.01;
+		speed.x = -speed.x * bounce;
+	}
+	if(position.y < 0.0){
+		position.y = 0.01;
+		speed.y = -speed.y * bounce;
+	} else if(position.y > screenSize.y){
+		position.y = screenSize.y - 0.01;
+		speed.y = -speed.y * bounce;
 	}
 
 	speed.y -= gravity * deltaTime;
-	if(position.y == 0.0){
-		speed.y = -speed.y * 0.5; // jumpyness
-	}
-
+	
 	outPosX = encodeFloat(position.x, screenSize.x);
     outPosY = encodeFloat(position.y, screenSize.y);
     outSpeedX = encodeFloat(speed.x, SPEED_RANGE);
     outSpeedY = encodeFloat(speed.y, SPEED_RANGE);
 }
-
-
-// // POS SHADER
-// void main() {
-// 	vec2 texcoord = gl_FragCoord.xy / DATA_TEXTURE_SIZE;
-
-// 	vec2 newPosition;
-
-// 	uint index = fragCoordToIndex(gl_FragCoord.xy);
-	// if(index >= firstMovedParticleIndex && index <= lastMovedParticleIndex){
-	// 	newPosition = screenSize / 2.0;
-	// } else {
-// 		vec2 particlePosition = unpackCoords(texture(position, texcoord).x, screenSize);
-// 		vec2 particleSpeed = unpackSpeed(texture(speed, texcoord).x, SPEED_RANGE);
-
-// 		newPosition = particlePosition + (particleSpeed * deltaTime);
-// 		newPosition = min(max(newPosition, vec2(0.0, 0.0)), screenSize);
-// 	// }
-
-// 	newPositionPack = packCoords(newPosition, screenSize);
-// }
-
-
-// // SPEED SHADER
-// void main() {
-// 	vec2 texcoord = gl_FragCoord.xy / DATA_TEXTURE_SIZE;
-// 	vec2 particlePosition = unpackCoords(texture(position, texcoord).x, screenSize);
-// 	vec2 particleSpeed = unpackSpeed(texture(speed, texcoord).x, SPEED_RANGE);
-
-// 	// particleSpeed.y -= gravity * deltaTime;
-// 	if(particlePosition.y == 0.0){
-// 		particleSpeed.y = -particleSpeed.y * 0.5; // jumpyness
-// 	}
-
-// 	newSpeedPack = packSpeed(particleSpeed, SPEED_RANGE);
-// }

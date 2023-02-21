@@ -68,8 +68,15 @@ export class DataShader extends Shader {
 	readonly screenSize: Uniform
 	readonly deltaTime: Uniform
 	readonly gravity: Uniform
+	readonly bounce: Uniform
 	readonly firstMovedParticleIndex: Uniform
 	readonly lastMovedParticleIndex: Uniform
+	readonly sprayX: Uniform
+	readonly sprayY: Uniform
+	readonly sprayDirection: Uniform
+	readonly sprayPower: Uniform
+	readonly spraySpread: Uniform
+	readonly sprayIntensity: Uniform
 
 	// attribs
 	readonly vertex: Attrib
@@ -86,6 +93,13 @@ export class DataShader extends Shader {
 		this.firstMovedParticleIndex = gl.getUniformLocation(this.program, "firstMovedParticleIndex")
 		this.lastMovedParticleIndex = gl.getUniformLocation(this.program, "lastMovedParticleIndex")
 		this.gravity = gl.getUniformLocation(this.program, "gravity")
+		this.bounce = gl.getUniformLocation(this.program, "bounce")
+		this.sprayX = gl.getUniformLocation(this.program, "sprayX")
+		this.sprayY = gl.getUniformLocation(this.program, "sprayY")
+		this.sprayDirection = gl.getUniformLocation(this.program, "sprayDirection")
+		this.sprayPower = gl.getUniformLocation(this.program, "sprayPower")
+		this.spraySpread = gl.getUniformLocation(this.program, "spraySpread")
+		this.sprayIntensity = gl.getUniformLocation(this.program, "sprayIntensity")
 	}
 
 }

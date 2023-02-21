@@ -36,3 +36,7 @@ vec4 absCoordsIntoScreenCoords(vec2 coords, vec2 screenSize){
 uint fragCoordToIndex(vec2 fragCoord){
   return uint(fragCoord.x) + uint(fragCoord.y * DATA_TEXTURE_SIZE);
 }
+
+#define randomUint(seed) ((((seed * 505339u) % 299099u) * 982231u) % 116833u) * 683201u
+#define randomFloatFromUint(seed) normalizeRandomUint(randomUint(seed))
+#define normalizeRandomUint(value) float(value % 0xffffffu) / float(0xffffffu)
