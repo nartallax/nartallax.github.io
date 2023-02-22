@@ -1,6 +1,6 @@
 import {cycledRequestAnimationFrame} from "common/cycled_request_animation_frame"
 import {GlUtils} from "common/gl_utils"
-import {DataTexture, DataTexturePair, DataTextureSingle, dataTextureSize, encodeFloat, particlesCount, speedRange} from "sketches/particle_toy/data_texture"
+import {DataTexture, DataTexturePair, DataTextureSingle, dataTextureSize, particlesCount} from "sketches/particle_toy/data_texture"
 import {FpsCounter} from "sketches/particle_toy/fps_counter"
 import {DataShader, DrawShader} from "sketches/particle_toy/shader"
 import {particlesMovedPerSecond, sprays, uploadSprays, zeroSpray} from "sketches/particle_toy/sprays"
