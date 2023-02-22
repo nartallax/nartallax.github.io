@@ -52,7 +52,7 @@ export function main(root: HTMLElement): void {
 		...zeroSpray,
 		x: coordsRange.x / 2 + 250,
 		y: 150,
-		direction: Math.PI * (3 / 4),
+		direction: -Math.PI * (3 / 4),
 		intensity: particlesCount / 20000,
 		power: 50,
 		spread: Math.PI / 2
@@ -151,6 +151,7 @@ function drawWalls(root: HTMLElement): void {
 		el.remove()
 	}
 	wallElements.length = 0
+	const pointSize = 10
 
 	for(const w of walls){
 		const rect = wallToRect(w)
@@ -159,7 +160,7 @@ function drawWalls(root: HTMLElement): void {
 
 		function addPoint(point: {x: number, y: number}, color: string): void {
 			const div = document.createElement("div")
-			div.style.cssText = `width:10px; height: 10px; position: absolute;top:${point.y}px;left: ${point.x}px;background-color: ${color}`
+			div.style.cssText = `width:${pointSize}px; height: ${pointSize}px; position: absolute;top:${point.y - (pointSize / 2)}px;left: ${point.x - (pointSize / 2)}px;background-color: ${color}`
 			root.appendChild(div)
 		}
 

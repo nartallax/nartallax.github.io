@@ -24,7 +24,7 @@ layout(location = 1) out uint outPosY;
 layout(location = 2) out uint outSpeedX;
 layout(location = 3) out uint outSpeedY;
 
-#define moveBySpray(sprayIndex) moveBySprayFn(position, speed, index, vec2(sprayX[sprayIndex], sprayY[sprayIndex]), sprayDirection[sprayIndex], sprayPower[sprayIndex], spraySpread[sprayIndex])
+#define moveBySpray(sprayIndex) moveBySprayFn(position, speed, index, vec2(sprayX[sprayIndex], screenSize.y - sprayY[sprayIndex]), sprayDirection[sprayIndex], sprayPower[sprayIndex], spraySpread[sprayIndex])
 
 void moveBySprayFn(inout vec2 position, inout vec2 speed, uint index, vec2 sprayPosition, float direction, float power, float spread){
 	position = sprayPosition;
@@ -92,7 +92,7 @@ void main(){
 		// rotating coord system; that way wall normal will always be 0
 		speedDirection -= wallNormal;
 		speedDirection = PI - speedDirection;
-		speedAbs *= bounce;
+		// speedAbs *= bounce; // FIXME: it's not working that way!
 		speed.x = speedAbs * cos(speedDirection);
 		speed.y = speedAbs * sin(speedDirection);
 		// this is (bad) attempt to avert a problem
