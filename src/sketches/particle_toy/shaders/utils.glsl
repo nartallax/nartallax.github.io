@@ -2,8 +2,10 @@ precision mediump float;
 precision mediump usampler2D;
 
 #define SPEED_RANGE 5000.0
+#define ANGLE_RANGE 3600.0
 #define INT_RANGEU 0x7fffffffu
 #define INT_RANGEF float(INT_RANGEU)
+#define PI 3.14159265358979323846
 
 float decodeFloat(uint value, float range){
   return (float(value) / INT_RANGEF) * range;
@@ -24,7 +26,6 @@ uvec2 getUintPairByIndex(usampler2D texX, usampler2D texY, uint index){
   vec2 texcoord = (vec2(x, y) + 0.5) / DATA_TEXTURE_SIZE;
   return uvec2(texture(texX, texcoord).x, texture(texY, texcoord).x);
 }
-
 
 #define getFloatPairByCoords(texX, texY, coords, range) (((vec2(texture(texX, coords).x, texture(texY, coords).x) - INT_RANGEF) / INT_RANGEF) * range)
 #define getFloatPairByIndex(texX, texY, index, range) (((vec2(getUintPairByIndex(texX, texY, index)) - INT_RANGEF) / INT_RANGEF) * range)

@@ -1,15 +1,14 @@
 import {cycledRequestAnimationFrame} from "common/cycled_request_animation_frame"
 import {GlUtils} from "common/gl_utils"
-import {DataTexture, DataTexturePair, dataTextureSize, particlesCount} from "sketches/particle_toy/data_texture"
+import {DataTexture, DataTexturePair, DataTextureSingle, dataTextureSize, encodeFloat, particlesCount, speedRange} from "sketches/particle_toy/data_texture"
 import {FpsCounter} from "sketches/particle_toy/fps_counter"
 import {DataShader, DrawShader} from "sketches/particle_toy/shader"
 import {particlesMovedPerSecond, sprays, uploadSprays, zeroSpray} from "sketches/particle_toy/sprays"
+import {uploadWalls, walls, wallToRect} from "sketches/particle_toy/walls"
 
 // reading:
 // https://webglfundamentals.org/webgl/lessons/webgl-gpgpu.html
 // https://developer.mozilla.org/en-US/docs/Web/API/WEBGL_draw_buffers
-
-const speedRange = 5000
 
 export function main(root: HTMLElement): void {
 	const canvas = document.createElement("canvas")
@@ -26,10 +25,15 @@ export function main(root: HTMLElement): void {
 	const idBuffer = makeIdBuffer(gl, particlesCount)
 	const squareBuffer = makeSquareBuffer(gl)
 	const coordsRange = {x: rootSize.width, y: rootSize.height}
-	const positionXTexture = new DataTexturePair(gl, makeDataArray(() => encodeFloat(Math.random() * coordsRange.x, coordsRange.x)))
-	const positionYTexture = new DataTexturePair(gl, makeDataArray(() => encodeFloat(Math.random() * coordsRange.y, coordsRange.y)))
-	const speedXTexture = new DataTexturePair(gl, makeDataArray(() => encodeFloat((Math.random() - 0.5) * 100, speedRange)))
-	const speedYTexture = new DataTexturePair(gl, makeDataArray(() => encodeFloat((Math.random() - 0.5) * 100, speedRange)))
+	// const positionXTexture = new DataTexturePair(gl, makeDataArray(() => encodeFloat(Math.random() * coordsRange.x, coordsRange.x)))
+	// const positionYTexture = new DataTexturePair(gl, makeDataArray(() => encodeFloat(Math.random() * coordsRange.y, coordsRange.y)))
+	// const speedXTexture = new DataTexturePair(gl, makeDataArray(() => encodeFloat((Math.random() - 0.5) * 100, speedRange)))
+	// const speedYTexture = new DataTexturePair(gl, makeDataArray(() => encodeFloat((Math.random() - 0.5) * 100, speedRange)))
+	const positionXTexture = new DataTexturePair(gl, makeDataArray())
+	const positionYTexture = new DataTexturePair(gl, makeDataArray())
+	const speedXTexture = new DataTexturePair(gl, makeDataArray())
+	const speedYTexture = new DataTexturePair(gl, makeDataArray())
+	const wallTexture = new DataTextureSingle(gl, makeDataArray(null, coordsRange), coordsRange)
 
 	const dataShader = new DataShader(gl)
 	const drawShader = new DrawShader(gl)
@@ -38,7 +42,7 @@ export function main(root: HTMLElement): void {
 		...zeroSpray,
 		x: coordsRange.x / 4,
 		y: coordsRange.y / 2,
-		direction: Math.PI / 4,
+		direction: -Math.PI / 4,
 		intensity: particlesCount / 10000,
 		power: 100,
 		spread: Math.PI / 16
@@ -46,24 +50,32 @@ export function main(root: HTMLElement): void {
 
 	sprays[1] = {
 		...zeroSpray,
-		x: coordsRange.x * (3 / 4),
-		y: coordsRange.y / 2,
+		x: coordsRange.x / 2 + 250,
+		y: 150,
 		direction: Math.PI * (3 / 4),
 		intensity: particlesCount / 20000,
 		power: 50,
 		spread: Math.PI / 2
 	}
 
-	const dataTextures = [positionXTexture, positionYTexture, speedXTexture, speedYTexture]
+	walls[0] = {
+		from: {x: coordsRange.x / 2 + 200, y: 200},
+		to: {x: (coordsRange.x / 2) - 500 + 200, y: 200 + 500}
+	}
+
+	const dataTextures = [positionXTexture, positionYTexture, speedXTexture, speedYTexture, wallTexture]
 	dataShader.use()
 	gl.uniform2f(dataShader.screenSize, coordsRange.x, coordsRange.y)
 	gl.uniform1i(dataShader.positionX, 0)
 	gl.uniform1i(dataShader.positionY, 1)
 	gl.uniform1i(dataShader.speedX, 2)
 	gl.uniform1i(dataShader.speedY, 3)
+	gl.uniform1i(dataShader.walls, 4)
 	gl.uniform1f(dataShader.gravity, 9.8) // TODO: config
 	gl.uniform1f(dataShader.bounce, 0.5) // TODO: config
 	uploadSprays(gl, dataShader) // TODO: config
+	drawWalls(root)
+	uploadWalls(gl, wallTexture, coordsRange) // TODO: config
 	const dataShaderVao = GlUtils.makeBindVAO(gl)
 	gl.bindBuffer(gl.ARRAY_BUFFER, squareBuffer)
 	gl.enableVertexAttribArray(dataShader.vertex)
@@ -101,14 +113,16 @@ export function main(root: HTMLElement): void {
 			gl.uniform1ui(dataShader.lastMovedParticleIndex, lastMovedParticleIndex)
 
 			bindTexturesToInputBuffers(gl, dataTextures)
-			bindTexturesToOutputBuffers(gl, dataTextures)
+			bindTexturesToOutputBuffers(gl, dataTextures.filter(x => x instanceof DataTexturePair))
 
 			gl.bindVertexArray(dataShaderVao)
 			gl.drawArrays(gl.TRIANGLES, 0, 6)
 		})
 
 		for(const tex of dataTextures){
-			tex.swap()
+			if(tex instanceof DataTexturePair){
+				tex.swap()
+			}
 		}
 
 		// draw step
@@ -131,9 +145,39 @@ export function main(root: HTMLElement): void {
 	})
 }
 
-function makeDataArray(getValue: (index: number) => number): Uint32Array {
-	const data = new Array(dataTextureSize * dataTextureSize).fill(0).map((_, i) => getValue(i))
-	return new Uint32Array(data)
+const wallElements: HTMLElement[] = []
+function drawWalls(root: HTMLElement): void {
+	for(const el of wallElements){
+		el.remove()
+	}
+	wallElements.length = 0
+
+	for(const w of walls){
+		const rect = wallToRect(w)
+
+		const colors = ["red", "green", "blue", "yellow"]
+
+		function addPoint(point: {x: number, y: number}, color: string): void {
+			const div = document.createElement("div")
+			div.style.cssText = `width:10px; height: 10px; position: absolute;top:${point.y}px;left: ${point.x}px;background-color: ${color}`
+			root.appendChild(div)
+		}
+
+		let i = 0
+		for(const point of rect){
+			addPoint(point, colors[i++]!)
+		}
+	}
+}
+
+function makeDataArray(getValue: ((index: number) => number) | null = null, size: {x: number, y: number} = {x: dataTextureSize, y: dataTextureSize}): Uint32Array {
+	const result = new Uint32Array(size.x * size.y)
+	if(getValue){
+		for(let i = 0; i < result.length; i++){
+			result[i] = getValue(i)
+		}
+	}
+	return result
 }
 
 function makeIdBuffer(gl: WebGL2RenderingContext, count: number): WebGLBuffer {
@@ -183,8 +227,4 @@ function bindTexturesToInputBuffers(gl: WebGL2RenderingContext, textures: DataTe
 		gl.activeTexture(gl.TEXTURE0 + i)
 		gl.bindTexture(gl.TEXTURE_2D, texture.texture)
 	}
-}
-
-function encodeFloat(value: number, range: number): number {
-	return Math.floor((value / range) * 0x7fffffff) + 0x7fffffff
 }

@@ -77,6 +77,7 @@ export class DataShader extends Shader {
 	readonly sprayPower: Uniform
 	readonly spraySpread: Uniform
 	readonly sprayIntensity: Uniform
+	readonly walls: Uniform
 
 	// attribs
 	readonly vertex: Attrib
@@ -100,6 +101,7 @@ export class DataShader extends Shader {
 		this.sprayPower = gl.getUniformLocation(this.program, "sprayPower")
 		this.spraySpread = gl.getUniformLocation(this.program, "spraySpread")
 		this.sprayIntensity = gl.getUniformLocation(this.program, "sprayIntensity")
+		this.walls = gl.getUniformLocation(this.program, "walls")
 	}
 
 }
