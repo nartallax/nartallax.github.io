@@ -132,14 +132,6 @@ function encodeOffset(offset: XY): number {
 	return Math.abs(offset.x) << 18 | Math.abs(offset.y) << 2 | (offset.y < 0 ? 0x1 : 0) | (offset.x < 0 ? 0x2 : 0)
 }
 
-function decodeOffset(offset: number): XY {
-	const xNeg = offset & 0x2
-	const yNeg = offset & 0x1
-	const x = offset >> 18 & 0xffff
-	const y = offset >> 2 & 0xffff
-	return {x: xNeg ? -x : x, y: yNeg ? -y : y}
-}
-
 function encodePosition(position: XY): number {
 	return position.x << 16 | position.y
 }
@@ -149,15 +141,6 @@ function decodePosition(position: number): XY {
 		x: (position >> 16) & 0xffff,
 		y: position & 0xffff
 	}
-}
-
-function ruleToString(rule: Rules[number]): string {
-	const result: string[] = []
-	for(const [offsetCode, patterns] of rule){
-		const offset = decodeOffset(offsetCode)
-		result.push(`${offset.x},${offset.y}: ${JSON.stringify(patterns)}`)
-	}
-	return result.join("; ")
 }
 
 function normalizeArray(input: number[]): number[] {
