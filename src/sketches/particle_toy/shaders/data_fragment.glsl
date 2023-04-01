@@ -41,6 +41,7 @@ void main(){
 	vec2 position = getFloatPairByCoords(positionX, positionY, texcoord, screenSize);
 	vec2 speed = getFloatPairByCoords(speedX, speedY, texcoord, SPEED_RANGE);
 
+	// big oof
 	uint sprayOffset = index - firstMovedParticleIndex;
 	if(sprayOffset >= 0u){
 		if(sprayOffset < sprayIntensity[0]){

@@ -34,16 +34,83 @@ export class Bitmap {
 
 	/** Set value of all the bits to 1 */
 	setAll(): void {
-		for(let i = 0; i < this.arr.length; i++){
-			this.arr[i] = 0xff
-		}
+		this.arr.fill(0xff)
 	}
 
 	/** Set value of all the bits to 0 */
 	clearAll(): void {
-		for(let i = 0; i < this.arr.length; i++){
-			this.arr[i] = 0
+		this.arr.fill(0)
+	}
+
+	/** @returns sorted array of offsets within [start, start + length] */
+	getOffsetsAsNumbers(start: number, length: number): number[] {
+		if(start & 0x7 || length & 0x7){
+			throw new Error("Assertion failed, only byte-aligned start/length is supported")
 		}
+		const result: number[] = []
+		let i = 0
+		for(let byteOffset = 0; byteOffset < (length >> 3); byteOffset++){
+			const byte = this.arr[(start >> 3) + byteOffset]!
+			let mask = 0x1
+			while(mask !== 0x100){
+				if(byte & mask){
+					result.push(i)
+				}
+				i++
+				mask <<= 1
+			}
+		}
+		return result
+	}
+
+	/** Sets to 1 every offset that is present in array of offsets and to 0 everything else
+	 * @param offsets sorted array of offsets
+	 * @returns if anything was changed */
+	setOffsetsByNumbers(start: number, length: number, offsets: number[]): boolean {
+		if(start & 0x7 || length & 0x7){
+			throw new Error("Assertion failed, only byte-aligned start/length is supported")
+		}
+		let hasChange = false
+		let offset = 0
+		let offsetIndex = 0
+		let nextNonzeroOffset = offsets[offsetIndex]
+		for(let byteOffset = 0; byteOffset < (length >> 3); byteOffset++){
+			const origByte = this.arr[(start >> 3) + byteOffset]!
+			let byte = 0
+			let mask = 0x1
+			while(mask !== 0x100){
+				const bit = offset === nextNonzeroOffset ? mask : 0
+				hasChange = hasChange || (origByte & mask) !== bit
+				if(bit){
+					byte |= mask
+					offsetIndex++
+					nextNonzeroOffset = offsets[offsetIndex]
+				}
+				offset++
+				mask <<= 1
+			}
+			this.arr[(start >> 3) + byteOffset] = byte
+		}
+		return hasChange
+	}
+
+	/** Applies bitwise-and operation to this bitmap; saves result in this bitmap
+	 * Expecting other bitmap to be smaller than this one
+	 * @returns if this bitmap was changed
+	 */
+	and(other: Bitmap, startThis: number): boolean {
+		if(startThis & 0x7){
+			throw new Error("Assertion failed, only byte-aligned start/length is supported")
+		}
+		let hasChange = false
+		for(let byteOffset = 0; byteOffset < other.arr.length; byteOffset++){
+			const thisByte = this.arr[(startThis >> 3) + byteOffset]!
+			const otherByte = other.arr[byteOffset]!
+			const result = thisByte & otherByte
+			hasChange = hasChange || (result !== thisByte)
+			this.arr[(startThis >> 3) + byteOffset] = result
+		}
+		return hasChange
 	}
 
 }
