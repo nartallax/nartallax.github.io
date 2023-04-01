@@ -22,7 +22,7 @@ export class PatternInput<T extends number = number> {
 	readonly root: HTMLElement
 
 	private readonly display: ColorArrayDisplay
-	private readonly pattern: readonly (T[])[]
+	private pattern: readonly (T[])[]
 	private primaryCb: ColorButton<T> | null = null
 	// I had logic around having secondary color on right mouse button
 	// but turns out mouseevent.buttons can be weird
@@ -103,6 +103,11 @@ export class PatternInput<T extends number = number> {
 				this.set(cellX, cellY, cb.color)
 			}
 		}
+	}
+
+	setValue(values: T[][]): void {
+		this.pattern = JSON.parse(JSON.stringify(values))
+		this.redrawCanvas()
 	}
 
 	set(x: number, y: number, color: T): void {

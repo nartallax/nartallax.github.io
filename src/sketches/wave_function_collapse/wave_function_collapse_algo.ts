@@ -22,11 +22,14 @@ export function waveFunctionCollapse<T>(params: WaveFunctionCollapseInput<T>): T
 	performeter.exitEnterBlock("collapse stage")
 
 	while(!matrix.isEverythingCollapsed()){
+		performeter.enterBlock("search")
 		const lowestEntropyPoint = matrix.findMinEntropyCell()
 		if(!lowestEntropyPoint){
 			throw new Error("No lowest entropy point!")
 		}
+		performeter.exitEnterBlock("collapse")
 		matrix.collapse(lowestEntropyPoint)
+		performeter.exitBlock()
 	}
 
 	const patternIndices = matrix.getResults()
@@ -399,6 +402,7 @@ class Matrix {
 	}
 
 	collapse(cell: XY): void {
+		performeter.enterBlock("collapse-set")
 		// console.log(`Collapsing at (${cell.x}, ${cell.y}): \n${this}`)
 		const cellIndex = cell.y * this.width + cell.x
 		const availableValues = this.matrix.getOffsetsAsNumbers(cellIndex * this.patternCount, this.patternCount)
@@ -409,6 +413,7 @@ class Matrix {
 		this.collapseMask.set(cellIndex)
 		this.incollapsedCellsCount--
 		if(availableValues.length === 1){
+			performeter.exitBlock()
 			return // it's already kinda collapsed, no action required
 		}
 		const selectedValue = availableValues[Math.floor(this.random() * availableValues.length)]!
@@ -421,7 +426,9 @@ class Matrix {
 			this.matrix.clear(cellIndex * this.patternCount + value)
 		}
 		this.entropy[cellIndex] = 0
+		performeter.exitEnterBlock("propagate")
 		this.propagateStartingAt(cell)
+		performeter.exitBlock()
 	}
 
 	private isInBounds(coords: XY): boolean {

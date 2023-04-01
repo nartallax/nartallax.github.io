@@ -53,6 +53,7 @@
         "noStrictGenericChecks": false,
         "noUnusedLocals": true,
         "noUnusedParameters": true,
-        "noUncheckedIndexedAccess": true
+        "noUncheckedIndexedAccess": true,
+        "resolveJsonModule": true
     }
 }
