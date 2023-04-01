@@ -1,4 +1,5 @@
 import {Bitmap} from "common/bitmap"
+import {performeter} from "common/perfometer"
 
 type WaveFunctionCollapseInput<T = unknown> = {
 	/** The source sample, from which patterns will be extracted
@@ -16,7 +17,9 @@ type WaveFunctionCollapseInput<T = unknown> = {
 }
 
 export function waveFunctionCollapse<T>(params: WaveFunctionCollapseInput<T>): T[][] {
-	const {patterns, patternsFreq, matrix} = init(params)
+	performeter.enterBlock("init stage")
+	const {patterns, matrix} = init(params)
+	performeter.exitEnterBlock("collapse stage")
 
 	while(!matrix.isEverythingCollapsed()){
 		const lowestEntropyPoint = matrix.findMinEntropyCell()
@@ -27,6 +30,8 @@ export function waveFunctionCollapse<T>(params: WaveFunctionCollapseInput<T>): T
 	}
 
 	const patternIndices = matrix.getResults()
+
+	performeter.exitBlock()
 
 	return patternIndices.map(row => row.map(patternIndex => {
 		const pattern = patterns[patternIndex]!
@@ -53,7 +58,7 @@ function init<T>(params: WaveFunctionCollapseInput<T>): InitResult<T> {
 	const [patterns, patternsFreq] = generatePatternsAndFrequences(params)
 	const rules = getRules(patterns, offsets)
 	const random = makeRandom(params.randomSeed)
-	const matrix = new Matrix(params.resultSize.width, params.resultSize.height, patterns.length, random, rules, offsets)
+	const matrix = new Matrix(params.resultSize.width, params.resultSize.height, patterns.length, random, rules, offsets, patternsFreq)
 	// console.log("Rules: ", rules)
 	return {offsets, patterns, patternsFreq, rules, matrix, random}
 }
@@ -155,6 +160,11 @@ function ruleToString(rule: Rules[number]): string {
 	return result.join("; ")
 }
 
+function normalizeArray(input: number[]): number[] {
+	const sum = input.reduce((a, b) => a + b, 0)
+	return input.map(x => x / sum)
+}
+
 function generatePatternsAndFrequences<T>(params: WaveFunctionCollapseInput<T>): [PatternData<T>[], number[]] {
 	let patterns = getPatternDataFromSource(params)
 
@@ -197,7 +207,7 @@ function generatePatternsAndFrequences<T>(params: WaveFunctionCollapseInput<T>):
 	for(const pattern of patterns){
 		freqs.push(freqMap.get(pattern)!)
 	}
-	return [patterns, freqs]
+	return [patterns, normalizeArray(freqs)]
 }
 
 function patternsAreEqual<T>(a: PatternData<T>, b: PatternData<T>): boolean {
@@ -344,7 +354,7 @@ function rotatePattern<T>(pattern: PatternData<T>, times: 1 | 2 | 3): PatternDat
 }
 
 class Matrix {
-	private readonly counts: number[]
+	private readonly entropy: number[]
 	private readonly matrix: Bitmap
 	private readonly collapseMask: Bitmap
 	private readonly patternCount: number
@@ -356,10 +366,11 @@ class Matrix {
 		patternCount: number,
 		private readonly random: () => number,
 		private readonly rules: Rules,
-		private readonly offsets: XY[]
+		private readonly offsets: XY[],
+		private readonly freqs: number[]
 	) {
 		this.patternCount = Math.ceil(patternCount / 8) * 8
-		this.counts = new Array(width * height).fill(patternCount)
+		this.entropy = new Array(width * height).fill(1)
 		this.matrix = new Bitmap(width * height * this.patternCount)
 		this.collapseMask = new Bitmap(width * height)
 		this.incollapsedCellsCount = width * height
@@ -379,13 +390,13 @@ class Matrix {
 	}
 
 	findMinEntropyCell(): XY | null {
-		let minEntropy = this.patternCount
+		let minEntropy = Number.MAX_SAFE_INTEGER
 		const cells: number[] = []
-		for(let i = 0; i < this.counts.length; i++){
+		for(let i = 0; i < this.entropy.length; i++){
 			if(this.collapseMask.get(i)){
 				continue
 			}
-			const entropy = this.counts[i]!
+			const entropy = this.entropy[i]!
 			if(entropy < minEntropy){
 				cells.length = 0
 				minEntropy = entropy
@@ -426,12 +437,12 @@ class Matrix {
 			}
 			this.matrix.clear(cellIndex * this.patternCount + value)
 		}
-		this.counts[cellIndex] = 1
+		this.entropy[cellIndex] = 0
 		this.propagateStartingAt(cell)
 	}
 
 	private isInBounds(coords: XY): boolean {
-		return coords.x > 0 && coords.y > 0 && coords.x < this.width && coords.y < this.height
+		return coords.x >= 0 && coords.y >= 0 && coords.x < this.width && coords.y < this.height
 	}
 
 	private propagateStartingAt(cell: XY): void {
@@ -481,7 +492,9 @@ class Matrix {
 		const targetCellIndex = targetCell.y * this.width + targetCell.x
 		const hasChange = this.matrix.and(resultTargetCellPatterns, targetCellIndex * this.patternCount)
 		if(hasChange){
-			this.counts[targetCellIndex] = this.matrix.getOffsetsAsNumbers(targetCellIndex * this.patternCount, this.patternCount).length
+			this.entropy[targetCellIndex] = this.matrix.getOffsetsAsNumbers(targetCellIndex * this.patternCount, this.patternCount)
+				.map(pattern => this.freqs[pattern]!)
+				.reduce((a, b) => a + b, 0)
 		}
 		return hasChange
 	}
@@ -576,6 +589,7 @@ class SetQueue<T> {
 	}
 }
 
+/** Format sequence of numbers in a shorter manner, compressing sequental spans into from-to format */
 function shortenNumberSpan(nums: number[]): string {
 	return joinSpans(nums, (a, b) => a + 1 === b).map(span => {
 		const first = span[0]!
