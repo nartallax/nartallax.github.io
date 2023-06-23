@@ -1,0 +1,75 @@
+@import "/src/website/style/vars";
+
+.root {
+	display: flex;
+	flex-direction: row;
+	align-items: stretch;
+	flex-grow: 1;
+	height: 100%;
+}
+
+.source, .output {
+	flex-grow: 1;
+	flex-shrink: 1;
+	flex-basis: 0;
+	min-width: 0;
+	overflow: auto;
+	color: $font-color;
+	background-color: $background-color;
+	padding: 1rem;
+	font-size: 0.9rem;
+	font-family: 'Courier New', Courier, monospace;
+	tab-size: 2em;
+
+	&::-webkit-scrollbar {
+		height: 12px;
+		width: 12px;
+		background: $foreground-primary-color;
+	}
+	
+	&::-webkit-scrollbar-thumb {
+		background: $foreground-secondary-color;
+		-webkit-border-radius: 0.25rem;
+	}
+	
+	&::-webkit-scrollbar-corner {
+		background: $foreground-primary-color;
+	}
+}
+
+.output {
+	border-left: 1px solid $foreground-primary-color;
+	white-space: pre;
+}
+
+.source {
+	outline: none;
+	border: none;
+	resize: none;
+}
+
+.copyButton {
+	transition-property: background-color, opacity;
+	transition-duration: 0.15s;
+	width: 4rem;
+	height: 2rem;
+	padding: 0.25rem;
+	box-sizing: border-box;
+	background-color: $foreground-primary-color;
+	color: $font-color;
+	position: absolute;
+	top: 0.5rem;
+	right: 3rem;
+	border: 0;
+	opacity: 0.25;
+	cursor: pointer;
+
+	&:hover {
+		opacity: 1;
+	}
+
+	&.onTimeout {
+		pointer-events: none;
+		background-color: $foreground-secondary-color;
+	}
+}

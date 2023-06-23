@@ -113,4 +113,13 @@ export class Bitmap {
 		return hasChange
 	}
 
+	orFromTheStart(other: Bitmap): void {
+		if(other.arr.length > this.arr.length){
+			throw new Error("Assertion failed, lengths are not equal")
+		}
+		for(let byteOffset = 0; byteOffset < other.arr.length; byteOffset++){
+			this.arr[byteOffset] = this.arr[byteOffset]! | other.arr[byteOffset]!
+		}
+	}
+
 }

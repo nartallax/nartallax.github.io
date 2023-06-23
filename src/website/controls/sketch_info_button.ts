@@ -22,10 +22,29 @@ function renderContentRefList(title: string, items: ContentReference[]): HTMLEle
 	return line
 }
 
+const getPosStyle = (_pos: SketchDescription["infoButtonPosition"], margin: string) => {
+	const pos = _pos ?? "topLeft"
+	const posIsTop = pos === "topLeft" || pos === "topRight"
+	const posIsLeft = pos === "topLeft" || pos === "bottomLeft"
+	return {
+		top: posIsTop ? margin : undefined,
+		bottom: posIsTop ? undefined : margin,
+		left: posIsLeft ? margin : undefined,
+		right: posIsLeft ? undefined : margin
+	}
+}
+
 export function SketchInfoButton(d: SketchDescription): HTMLElement {
-	const button = tag({class: css.sketchInfoButton, text: "i"})
+	const button = tag({
+		class: css.sketchInfoButton,
+		text: "i",
+		style: getPosStyle(d.infoButtonPosition, "0.5rem")
+	})
 	button.addEventListener("click", () => {
-		const block = tag({class: css.sketchInfoBlock})
+		const block = tag({
+			class: css.sketchInfoBlock,
+			style: getPosStyle(d.infoButtonPosition, "0px")
+		})
 
 		block.appendChild(tag({text: d.name}))
 		block.appendChild(tag({text: d.description}))

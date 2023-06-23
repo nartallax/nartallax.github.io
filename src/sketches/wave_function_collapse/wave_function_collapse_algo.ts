@@ -45,7 +45,7 @@ export function waveFunctionCollapse<T>(params: WaveFunctionCollapseInput<T>): T
 type XY = {x: number, y: number}
 type PatternData<T = unknown> = readonly (readonly T[])[]
 // Array(pattern index -> Map(encoded offset -> list of available pattern indices for that offset))
-type Rules = Map<number, number[]>[]
+type Rules = Map<number, Bitmap>[]
 type InitResult<T> = {
 	matrix: Matrix
 	offsets: XY[]
@@ -68,7 +68,7 @@ function init<T>(params: WaveFunctionCollapseInput<T>): InitResult<T> {
 
 function getRules<T>(patterns: PatternData<T>[], offsets: XY[]): Rules {
 	const result: Rules = new Array(patterns.length).fill(null).map(() => {
-		const patternsByOffset = new Map<number, number[]>(offsets.map(offset => [encodeOffset(offset), []]))
+		const patternsByOffset = new Map<number, Bitmap>(offsets.map(offset => [encodeOffset(offset), new Bitmap(patterns.length)]))
 		return patternsByOffset
 	})
 	// console.log("Patterns", patterns)
@@ -82,8 +82,8 @@ function getRules<T>(patterns: PatternData<T>[], offsets: XY[]): Rules {
 			for(let bIndex = aIndex; bIndex < patterns.length; bIndex++){
 				const b = patterns[bIndex]!
 				if(patternsHaveMatch(a, b, offset)){
-					result[aIndex]!.get(encodedOffset)!.push(bIndex)
-					result[bIndex]!.get(flipEncodedOffset)!.push(aIndex)
+					result[aIndex]!.get(encodedOffset)!.set(bIndex)
+					result[bIndex]!.get(flipEncodedOffset)!.set(aIndex)
 				}
 			}
 		}
@@ -467,17 +467,20 @@ class Matrix {
 
 	private propagateToCellByOffset(origCell: XY, offset: XY): boolean {
 		// TODO: optimise here
+		performeter.enterBlock("assemble_pattern")
 		const encodedOffset = encodeOffset(offset)
 		const origCellIndex = origCell.y * this.width + origCell.x
+		performeter.enterBlock("get offsets")
 		const origCellPatterns = this.matrix.getOffsetsAsNumbers(origCellIndex * this.patternCount, this.patternCount)
+		performeter.exitEnterBlock("OR pattern")
 		const resultTargetCellPatterns = new Bitmap(this.patternCount)
 		for(const origPattern of origCellPatterns){
 			const patternsByRule = this.rules[origPattern]!.get(encodedOffset)!
-			for(const targetPattern of patternsByRule){
-				resultTargetCellPatterns.set(targetPattern)
-			}
+			resultTargetCellPatterns.orFromTheStart(patternsByRule)
 		}
+		performeter.exitBlock()
 
+		performeter.exitEnterBlock("apply_pattern")
 		const targetCell = {x: origCell.x + offset.x, y: origCell.y + offset.y}
 		const targetCellIndex = targetCell.y * this.width + targetCell.x
 		const hasChange = this.matrix.and(resultTargetCellPatterns, targetCellIndex * this.patternCount)
@@ -486,6 +489,7 @@ class Matrix {
 				.map(pattern => this.freqs[pattern]!)
 				.reduce((a, b) => a + b, 0)
 		}
+		performeter.exitBlock()
 		return hasChange
 	}
 

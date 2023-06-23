@@ -18,6 +18,7 @@ export interface SketchDescription {
 	code(): Promise<SketchObject>
 	readonly hidden?: boolean
 	readonly thumbnail: string
+	readonly infoButtonPosition?: "topLeft" | "topRight" | "bottomLeft" | "bottomRight"
 }
 
 interface SketchObject {
@@ -127,6 +128,16 @@ const _sketches = {
 			description: "Youtube video about this code",
 			url: "https://github.com/avihuxp/WaveFunctionCollapse"
 		}]
+	},
+
+	ribcage_converter: {
+		name: "RC converter",
+		description: "A tool that can convert some TS type definitions into RC structure definitions",
+		date: new Date(2023, 4, 8),
+		tags: [contentTags.tool],
+		code: () => import("sketches/ribcage_converter/ribcage_converter"),
+		thumbnail: notImplementedThumb,
+		infoButtonPosition: "topRight" as const
 	}
 }
 

@@ -16,6 +16,7 @@ class Perfometer {
 
 	private root: Block = this.makeBlock(null)
 	private currentBlock: Block = this.root
+	private eventCounters: Record<string, number> = {}
 
 	private makeBlock(parent: Block | null): Block {
 		return {
@@ -34,6 +35,10 @@ class Perfometer {
 		nextBlock.timeStart = performance.now()
 		nextBlock.enterCount++
 		this.currentBlock = nextBlock
+	}
+
+	recordEvent(name: string): void {
+		this.eventCounters[name] = (this.eventCounters[name] ?? 0) + 1
 	}
 
 	exitBlock(): void {
@@ -67,11 +72,13 @@ class Perfometer {
 		})
 
 		console.table(table)
+		console.table(this.eventCounters)
 	}
 
 	reset(): void {
 		this.root = this.makeBlock(null)
 		this.currentBlock = this.root
+		this.eventCounters = {}
 	}
 
 	private forEachBlock(callback: (block: Block, name: string, depth: number) => void, start: Block = this.root, currentDepth = 0): void {

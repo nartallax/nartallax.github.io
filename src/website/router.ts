@@ -8,7 +8,7 @@ export type RouteDescription = {
 
 export type RouteMap<R extends string> = {readonly [route in R]: RouteDescription}
 
-type RouteArgumentValue = string | boolean
+type RouteArgumentValue = string | true
 type RouteArgs = Record<string, RouteArgumentValue>
 
 export class Router<R extends string> {
@@ -17,8 +17,10 @@ export class Router<R extends string> {
 	private readonly titleBox = getTitleBox()
 	private root: Element | null = null
 	private currentArgs: RouteArgs = {}
+	private currentRoute: R
 
 	constructor(private readonly routes: RouteMap<R>, private readonly defaultRoute: R) {
+		this.currentRoute = defaultRoute
 	}
 
 	startAt(root: Element): void {
@@ -44,8 +46,21 @@ export class Router<R extends string> {
 		return this.currentArgs[name]
 	}
 
+	setArgument(name: string, value: RouteArgumentValue | undefined): void {
+		const newArgs = {...this.currentArgs}
+		if(value === undefined){
+			delete newArgs[name]
+		} else {
+			newArgs[name] = value
+		}
+		this.hashBox(this.formHash(this.currentRoute, newArgs))
+	}
+
 	private checkHash(): void {
 		const [route, args] = this.parseHash(this.hashBox())
+		if(route === this.currentRoute){
+			return // just a change in arguments, no reason to panic
+		}
 
 		const description = this.routes[route]
 		if(!description){
@@ -53,6 +68,7 @@ export class Router<R extends string> {
 			return
 		}
 
+		this.currentRoute = route
 		this.currentArgs = args
 		return this.renderRoute(description)
 	}
@@ -78,9 +94,6 @@ export class Router<R extends string> {
 		let result: string = route
 		let first = true
 		for(const [k, v] of Object.entries(args)){
-			if(v === false){
-				continue
-			}
 			result += first ? ((first = false), "?") : "&"
 			result += encodeURIComponent(k)
 			if(v !== true){
