@@ -137,7 +137,18 @@ const _sketches = {
 		tags: [contentTags.tool],
 		code: () => import("sketches/ribcage_converter/ribcage_converter"),
 		thumbnail: notImplementedThumb,
-		infoButtonPosition: "topRight" as const
+		infoButtonPosition: "topRight" as const,
+		hidden: true
+	},
+
+	factorio_pixelart: {
+		name: "Factorio Pixelart converter",
+		description: "A tool that can convert an image to factorio blueprint",
+		date: new Date(2023, 5, 23),
+		tags: [contentTags.tool],
+		code: () => import("sketches/factorio_pixelart/factorio_pixelart"),
+		thumbnail: notImplementedThumb,
+		hidden: true
 	}
 }
 

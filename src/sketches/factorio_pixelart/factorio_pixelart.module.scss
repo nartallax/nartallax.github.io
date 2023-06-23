@@ -1,0 +1,13 @@
+@import "/src/website/style/vars";
+
+.blueprintStringContainer {
+	padding: 1rem;
+	color: $font-color;
+	background-color: $foreground-primary-color;
+
+	max-width: 90vw;
+	max-height: 50vh;
+	overflow-y: auto;
+	overflow-wrap:break-word;
+	margin: 1rem auto;
+}

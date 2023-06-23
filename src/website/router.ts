@@ -29,7 +29,7 @@ export class Router<R extends string> {
 		}
 		this.root = root
 		this.hashBox.subscribe(() => this.checkHash())
-		this.checkHash()
+		this.checkHash(true)
 	}
 
 	formRouteURL(route: R, args?: RouteArgs): string {
@@ -56,9 +56,9 @@ export class Router<R extends string> {
 		this.hashBox(this.formHash(this.currentRoute, newArgs))
 	}
 
-	private checkHash(): void {
+	private checkHash(alwaysRender = false): void {
 		const [route, args] = this.parseHash(this.hashBox())
-		if(route === this.currentRoute){
+		if(route === this.currentRoute && !alwaysRender){
 			return // just a change in arguments, no reason to panic
 		}
 
