@@ -5,6 +5,7 @@ import timerThumb from "sketches/timer/thumb.png"
 import squaremix3dThumb from "sketches/squaremix_3d/thumb.png"
 import planetsThumb from "sketches/planets/thumb.png"
 import particleToyThumb from "sketches/particle_toy/thumb.png"
+import waveFunctionCollapseThumb from "sketches/wave_function_collapse/thumb.png"
 import notImplementedThumb from "./default_thumbnail.png"
 
 export interface SketchDescription {
@@ -123,7 +124,7 @@ const _sketches = {
 		date: new Date(2023, 3, 1),
 		tags: [contentTags.tool],
 		code: () => import("sketches/wave_function_collapse/wave_function_collapse"),
-		thumbnail: notImplementedThumb,
+		thumbnail: waveFunctionCollapseThumb,
 		inspiration: [{
 			description: "Youtube video about this code",
 			url: "https://github.com/avihuxp/WaveFunctionCollapse"
