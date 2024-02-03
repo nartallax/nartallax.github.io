@@ -6,6 +6,7 @@ import squaremix3dThumb from "sketches/squaremix_3d/thumb.png"
 import planetsThumb from "sketches/planets/thumb.png"
 import particleToyThumb from "sketches/particle_toy/thumb.png"
 import waveFunctionCollapseThumb from "sketches/wave_function_collapse/thumb.png"
+import zenBlockbreakerThumb from "sketches/zen_blockbreaker/thumb.png"
 import notImplementedThumb from "./default_thumbnail.png"
 
 export interface SketchDescription {
@@ -150,8 +151,17 @@ const _sketches = {
 		code: () => import("sketches/factorio_pixelart/factorio_pixelart"),
 		thumbnail: notImplementedThumb,
 		hidden: true
+	},
+
+	zen_blockbreaker: {
+		name: "Zen blockbreaker",
+		description: "Simulation of infinite self-playing game of ping-pong against a shapeshifting wall.",
+		date: new Date(2024, 1, 2),
+		tags: [contentTags.art, contentTags.tool],
+		code: () => import("sketches/zen_blockbreaker/zen_blockbreaker"),
+		thumbnail: zenBlockbreakerThumb
 	}
-}
+} satisfies Record<string, Omit<SketchDescription, "id">>
 
 export const sketchDescriptions = (() => {
 	const res: Record<string, SketchDescription> = {}

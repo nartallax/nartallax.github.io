@@ -136,7 +136,7 @@ export function main(root: HTMLElement): void {
 		gl.drawArrays(gl.POINTS, 0, particlesCount)
 	}
 
-	cycledRequestAnimationFrame(deltaTime => {
+	cycledRequestAnimationFrame(canvas, deltaTime => {
 		if(deltaTime > 250){
 			return
 		}

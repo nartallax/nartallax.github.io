@@ -18,7 +18,7 @@ export type PlanetSimulationBodyWithGraphics = BodyBase & BodyInternalProps
 
 export class PlanetsSimulationWithGraphics {
 
-	private readonly svg: SVGSVGElement
+	readonly svg: SVGSVGElement
 	private readonly simulation: PlanetsSimulation<PlanetSimulationBodyWithGraphics>
 
 	constructor(root: HTMLElement, private readonly zoom: number) {

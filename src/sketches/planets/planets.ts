@@ -75,7 +75,7 @@ export function main(root: HTMLElement): void {
 	})
 
 
-	cycledRequestAnimationFrame(deltaTime => {
+	cycledRequestAnimationFrame(scene.svg, deltaTime => {
 		if(deltaTime > 50){
 			return
 		}

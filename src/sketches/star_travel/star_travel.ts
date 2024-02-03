@@ -121,7 +121,7 @@ class StarTravelController {
 
 	start() {
 		this.init()
-		cycledRequestAnimationFrame(timePassed => {
+		cycledRequestAnimationFrame(this.root, timePassed => {
 			if(timePassed > 1000 || this.root.clientWidth !== this.width || this.root.clientHeight !== this.height){
 				this.init()
 				return
