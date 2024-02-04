@@ -61,7 +61,7 @@ export function rgbToHsl(color: number): number {
 	s = +(s * 100).toFixed(1)
 	l = +(l * 100).toFixed(1)
 
-	return color3ComponentsToNumber([(h / 360) * 256, (s / 100) * 256, (l / 100) * 256])
+	return color3ComponentsToNumber([(h / 360) * 255, (s / 100) * 255, (l / 100) * 255])
 }
 
 export function hslToRgb(hsl: number): number {
@@ -81,7 +81,7 @@ export function hslToRgb(hsl: number): number {
 		b = hueToRgb(p, q, h - 1 / 3)
 	}
 
-	return color3ComponentsToNumber([Math.floor(r * 256), Math.floor(g * 256), Math.floor(b * 256)])
+	return color3ComponentsToNumber([Math.floor(r * 255), Math.floor(g * 255), Math.floor(b * 255)])
 }
 
 function hueToRgb(p: number, q: number, t: number): number {
@@ -111,4 +111,20 @@ export function rgbNumberToColorString(rgb: number): string {
 	const r = rgb & 0xff
 
 	return "#" + twoHex(r) + twoHex(g) + twoHex(b)
+}
+
+export function transformColorHsl(colorRgb: number, transform: (hsl: [number, number, number]) => [number, number, number]): number {
+	const transformResult = transform(
+		colorNumberTo3Components(
+			rgbToHsl(colorRgb)
+		)
+	)
+	transformResult[0] = Math.max(0, Math.min(255, transformResult[0]))
+	transformResult[1] = Math.max(0, Math.min(255, transformResult[1]))
+	transformResult[2] = Math.max(0, Math.min(255, transformResult[2]))
+	return hslToRgb(
+		color3ComponentsToNumber(
+			transformResult
+		)
+	)
 }

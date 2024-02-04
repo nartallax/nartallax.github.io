@@ -1,6 +1,6 @@
-import {rgbNumberToColorString} from "common/color_utils"
+import {rgbNumberToColorString, transformColorHsl} from "common/color_utils"
 import {cycledRequestAnimationFrame} from "common/cycled_request_animation_frame"
-import {tag} from "common/tag"
+import {svgTag, tag} from "common/tag"
 import * as Matter from "lib/matterjs/matter"
 
 interface Params {
@@ -10,9 +10,21 @@ interface Params {
 	readonly height: number // blocks
 	readonly ballSpeed: number // blocks per second
 	readonly sideCount: number
-	readonly blockColors: readonly number[]
-	readonly ballColors: readonly number[]
+	readonly colors: readonly number[]
+	readonly render: "matterjs" | "svg"
 	onStatsChange(): void
+}
+
+interface Ball {
+	readonly body: Matter.Body
+	readonly el: SVGCircleElement | null
+	readonly color: number
+}
+
+interface Block {
+	readonly body: Matter.Body
+	readonly el: SVGRectElement | null
+	readonly color: number
 }
 
 /** Multiplier of matter.js scale
@@ -23,11 +35,18 @@ const matterMul = 100
 export class ZenBlockbreaker {
 	readonly root: HTMLElement
 	private readonly matter: Matter.Engine
-	private readonly render: Matter.Render
+	private render: Matter.Render | null = null
+	private svg: SVGSVGElement | null = null
 	private ticksPerFrame: number
 	readonly stats = new Map<number, number>()
+	readonly balls: Ball[] = []
+	private readonly blockColors: readonly number[]
 
 	constructor(private readonly params: Params) {
+		this.blockColors = this.params.colors.map(color => transformColorHsl(color,
+			([h, s, l]) => [h, s * 0.75, l * 0.9]
+		))
+
 		this.root = tag()
 
 		this.ticksPerFrame = params.ticksPerFrame
@@ -36,10 +55,34 @@ export class ZenBlockbreaker {
 			enableSleeping: true
 		})
 
+		if(this.params.render === "matterjs"){
+			this.makeMatterjsRender()
+		} else {
+			this.makeSvgRender()
+		}
+
 		this.makeWalls()
 		this.makeBlocks()
 		this.makeBalls()
 
+		Matter.Events.on(this.matter, "collisionEnd", (e: Matter.IEventCollision<Matter.Engine>) => {
+			for(const pair of e.pairs){
+				this.processCollision(pair)
+			}
+		})
+	}
+
+	private makeSvgRender(): void {
+		this.svg = svgTag({tagName: "svg"})
+		this.svg.setAttribute("width", this.params.width + "")
+		this.svg.setAttribute("height", this.params.height + "")
+		this.svg.setAttribute("viewBox", `0 0 ${this.params.width} ${this.params.height}`)
+		this.svg.style.width = (this.params.width * this.params.blockSizePx) + "px"
+		this.svg.style.height = (this.params.height * this.params.blockSizePx) + "px"
+		this.root.appendChild(this.svg)
+	}
+
+	private makeMatterjsRender(): void {
 		this.render = Matter.Render.create({
 			element: this.root,
 			engine: this.matter,
@@ -52,12 +95,6 @@ export class ZenBlockbreaker {
 		Matter.Render.lookAt(this.render, {
 			min: {x: 0, y: 0},
 			max: {x: this.params.width * matterMul, y: this.params.height * matterMul}
-		})
-
-		Matter.Events.on(this.matter, "collisionEnd", (e: Matter.IEventCollision<Matter.Engine>) => {
-			for(const pair of e.pairs){
-				this.processCollision(pair)
-			}
 		})
 	}
 
@@ -104,45 +141,40 @@ export class ZenBlockbreaker {
 	}
 
 	private processCollision(collision: Matter.Pair): void {
-		const ballAndColor = this.getBallFromCollision(collision)
-		if(!ballAndColor){
+		const ball = this.getBallFromCollision(collision)
+		if(!ball){
 			// what?
 			return
 		}
 
-		const [ball, ballColor] = ballAndColor
-		const velocityAngle = Math.atan2(ball.velocity.y, ball.velocity.x)
+		const velocityAngle = Math.atan2(ball.body.velocity.y, ball.body.velocity.x)
 		// if we don't do this - ball will gradually lose speed, which is bad
 		// yes, everything has restitution = 1 and friction = 0
 		// but the very nature of incremental simulations is lossy, no way around this
 		this.setBallSpeed(ball, velocityAngle)
 
-		const blockAndColor = this.getBlockFromCollision(collision)
-		if(!blockAndColor){
+		const block = this.getBlockFromCollision(collision)
+		if(!block){
 			// wall?
 			return
 		}
-		const [block, blockColor] = blockAndColor
-		this.setBlockColor(block, blockColor, ballColor)
+		this.setBlockColor(block, block.color, ball.color)
 		this.params.onStatsChange()
 	}
 
-	private setBallSpeed(ball: Matter.Body, angle: number): void {
-		Matter.Body.setVelocity(ball, {
+	private setBallSpeed(ball: Ball, angle: number): void {
+		Matter.Body.setVelocity(ball.body, {
 			x: Math.cos(angle) * this.params.ballSpeed,
 			y: Math.sin(angle) * this.params.ballSpeed
 		})
 	}
 
 	private makeBlock(x: number, y: number, color: number): void {
-		const block = Matter.Bodies.rectangle(x * matterMul, y * matterMul, 1 * matterMul, 1 * matterMul, {
+		const body = Matter.Bodies.rectangle(x * matterMul, y * matterMul, 1 * matterMul, 1 * matterMul, {
 			isStatic: true,
 			isSleeping: true,
 			render: {
 				fillStyle: "black"
-			},
-			plugin: {
-				blockColor: 0
 			},
 			restitution: 1,
 			label: `Block at ${x},${y}`,
@@ -153,47 +185,63 @@ export class ZenBlockbreaker {
 			}
 		})
 
-		this.setBlockColor(block, null, color)
+		Matter.Composite.add(this.matter.world, [body])
 
-		Matter.Composite.add(this.matter.world, [block])
+		const block: Block = {
+			body, color,
+			el: this.params.render !== "svg" ? null : svgTag({tagName: "rect",
+				attrs: {
+					fill: "block",
+					width: 1,
+					height: 1,
+					x: x - 0.5,
+					y: y - 0.5
+				}})
+		}
+		body.plugin.block = block
+		if(block.el){
+			this.svg!.appendChild(block.el)
+		}
+
+		this.setBlockColor(block, null, color)
 	}
 
-	private setBlockColor(block: Matter.Body, oldColor: number | null, newColor: number): void {
+	private setBlockColor(block: Block, oldColor: number | null, newColor: number): void {
 		if(oldColor !== null){
 			this.stats.set(oldColor, (this.stats.get(oldColor) ?? 0) - 1)
 		}
 		this.stats.set(newColor, (this.stats.get(newColor) ?? 0) + 1)
 
-		block.render.fillStyle = rgbNumberToColorString(this.params.blockColors[newColor]!)
-		block.plugin.blockColor = newColor
-		block.collisionFilter.category = 1 << newColor
-		block.collisionFilter.mask = 0x8fffffff & (~(1 << newColor))
+		block.body.plugin.blockColor = newColor
+		block.body.collisionFilter.category = 1 << newColor
+		block.body.collisionFilter.mask = 0x8fffffff & (~(1 << newColor))
+
+		const colorStr = rgbNumberToColorString(this.blockColors[newColor]!)
+		if(this.params.render === "matterjs"){
+			block.body.render.fillStyle = colorStr
+		} else {
+			block.el!.style.fill = colorStr
+		}
 	}
 
-	private getBlockFromCollision(pair: Matter.Pair): [Matter.Body, number] | null {
-		let color = this.getBlockColor(pair.bodyA)
-		if(color !== null){
-			return [pair.bodyA, color]
-		}
-		color = this.getBlockColor(pair.bodyB)
-		if(color !== null){
-			return [pair.bodyB, color]
-		}
-		return null
+	private getBlockFromCollision(pair: Matter.Pair): Block | null {
+		return this.getBlock(pair.bodyA) ?? this.getBlock(pair.bodyB)
 	}
 
-	private getBlockColor(block: Matter.Body): number | null {
-		return block.plugin.blockColor ?? null
+	private getBlock(block: Matter.Body): Block | null {
+		return block.plugin.block ?? null
 	}
 
 	private makeBall(x: number, y: number, color: number): void {
-		const ball = Matter.Bodies.circle(x * matterMul, y * matterMul, 0.5 * matterMul, {
+		const colorRgbSrc = this.params.colors[color]!
+		const colorStr = rgbNumberToColorString(transformColorHsl(colorRgbSrc,
+			([h, s, l]) => [h, s * 1.1, l * 1.25]
+		))
+
+		const body = Matter.Bodies.circle(x * matterMul, y * matterMul, 0.5 * matterMul, {
 			isStatic: false,
 			render: {
-				fillStyle: rgbNumberToColorString(this.params.ballColors[color]!)
-			},
-			plugin: {
-				ballColor: color
+				fillStyle: colorStr
 			},
 			restitution: 1,
 			friction: 0,
@@ -207,26 +255,31 @@ export class ZenBlockbreaker {
 			}
 		})
 
+		Matter.Composite.add(this.matter.world, [body])
+
+		const ball: Ball = {
+			body,
+			color,
+			el: this.params.render !== "svg" ? null : svgTag({tagName: "circle", attrs: {
+				cx: x, cy: y, r: 0.5, fill: colorStr
+			}})
+		}
+		body.plugin.ball = ball
+		this.balls.push(ball)
+		if(ball.el){
+			this.svg!.appendChild(ball.el)
+		}
+
 		const angle = Math.random() * Math.PI * 2
 		this.setBallSpeed(ball, angle)
-
-		Matter.Composite.add(this.matter.world, [ball])
 	}
 
-	private getBallFromCollision(pair: Matter.Pair): [Matter.Body, number] | null {
-		let color = this.getBallColor(pair.bodyA)
-		if(color !== null){
-			return [pair.bodyA, color]
-		}
-		color = this.getBallColor(pair.bodyB)
-		if(color !== null){
-			return [pair.bodyB, color]
-		}
-		return null
+	private getBallFromCollision(pair: Matter.Pair): Ball | null {
+		return this.getBall(pair.bodyA) ?? this.getBall(pair.bodyB)
 	}
 
-	private getBallColor(body: Matter.Body): number | null {
-		return body.plugin.ballColor ?? null
+	private getBall(body: Matter.Body): Ball | null {
+		return body.plugin.ball ?? null
 	}
 
 	private makeWalls(): void {
@@ -263,7 +316,9 @@ export class ZenBlockbreaker {
 	}
 
 	run(): void {
-		Matter.Render.run(this.render)
+		if(this.render){
+			Matter.Render.run(this.render)
+		}
 		const stop = cycledRequestAnimationFrame(this.root, delta => {
 			delta /= 1000 // delta in seconds
 			if(delta > 0.1){
@@ -275,12 +330,25 @@ export class ZenBlockbreaker {
 				for(let i = 0; i < this.ticksPerFrame; i++){
 					Matter.Engine.update(this.matter, delta * 1000)
 				}
+				if(this.params.render === "svg"){
+					this.updateBallElements()
+				}
 			} catch(e){
 				stop()
 				throw e
 			}
 		}, () => {
-			Matter.Render.stop(this.render)
+			if(this.render){
+				Matter.Render.stop(this.render)
+			}
 		})
+	}
+
+	private updateBallElements(): void {
+		for(const ball of this.balls){
+			const el = ball.el!
+			el.setAttribute("cx", (ball.body.position.x / matterMul) + "")
+			el.setAttribute("cy", (ball.body.position.y / matterMul) + "")
+		}
 	}
 }

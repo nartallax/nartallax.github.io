@@ -1,14 +1,7 @@
-import {color3ComponentsToNumber, colorNumberTo3Components, hslToRgb, rgbToHsl} from "common/color_utils"
 import {makeBottomBar} from "sketches/zen_blockbreaker/bottom_bar"
 import {ZenBlockbreaker} from "sketches/zen_blockbreaker/zen_blockbreaker_impl"
 
 const blockColors = [0x000000, 0x53bc01, 0xffeb03, 0xffa801, 0xf93a1d, 0xe21a5f, 0x572c62, 0xa1ccd3, 0x006898]
-const ballColors = blockColors.map(color => {
-	const hsl = colorNumberTo3Components(rgbToHsl(color))
-	hsl[1] = Math.min(255, hsl[1] * 1.25)
-	hsl[2] = Math.min(255, hsl[2] * 1.25)
-	return hslToRgb(color3ComponentsToNumber(hsl))
-})
 
 export function main(container: HTMLElement): void {
 	const initialTicksPerFrame = 3
@@ -44,8 +37,8 @@ export function main(container: HTMLElement): void {
 		width: Math.floor(width / blockSizePx),
 		sideCount,
 		onStatsChange: () => bottomBar.onStatsUpdate(blockbreaker.stats),
-		blockColors,
-		ballColors
+		colors: blockColors,
+		render: "svg"
 	})
 
 	bottomBar.root.before(blockbreaker.root)

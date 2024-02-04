@@ -43,4 +43,15 @@ export class Queue<T> {
 		this.headNode = this.tailNode = undefined
 	}
 
+	toArrayHeadFirst(): T[] {
+		const result: T[] = new Array(this.len)
+		let node = this.headNode
+		let i = 0
+		while(node){
+			result[i++] = node.value
+			node = node.prev
+		}
+		return result
+	}
+
 }
