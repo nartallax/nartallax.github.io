@@ -42,8 +42,8 @@ type CursorMoveHandlerParams = {
 export function addCursorMoveHandler(params: CursorMoveHandlerParams): void {
 
 	const onDown = (e: MouseEvent | TouchEvent) => {
-		params.element.addEventListener("mousemove", params.onMove, {passive: true})
-		params.element.addEventListener("touchmove", params.onMove, {passive: true})
+		window.addEventListener("mousemove", params.onMove, {passive: true})
+		window.addEventListener("touchmove", params.onMove, {passive: true})
 		window.addEventListener("mouseup", onUp, {passive: true})
 		window.addEventListener("touchend", onUp, {passive: true})
 		if(params.downIsMove){
@@ -52,8 +52,8 @@ export function addCursorMoveHandler(params: CursorMoveHandlerParams): void {
 	}
 
 	const onUp = (e: MouseEvent | TouchEvent) => {
-		params.element.removeEventListener("mousemove", params.onMove)
-		params.element.removeEventListener("touchmove", params.onMove)
+		window.removeEventListener("mousemove", params.onMove)
+		window.removeEventListener("touchmove", params.onMove)
 		window.removeEventListener("mouseup", onUp)
 		window.removeEventListener("touchend", onUp)
 		if(params.upIsMove){

@@ -157,9 +157,12 @@ const _sketches = {
 		name: "Zen blockbreaker",
 		description: "Simulation of infinite self-playing game of ping-pong against a shapeshifting wall.",
 		date: new Date(2024, 1, 2),
-		tags: [contentTags.art, contentTags.tool],
+		tags: [contentTags.art, contentTags.matterjs, contentTags.svg],
 		code: () => import("sketches/zen_blockbreaker/zen_blockbreaker"),
-		thumbnail: zenBlockbreakerThumb
+		thumbnail: zenBlockbreakerThumb,
+		inspiration: [{
+			description: "A video without clear source found somewhere on the internet"
+		}]
 	}
 } satisfies Record<string, Omit<SketchDescription, "id">>
 

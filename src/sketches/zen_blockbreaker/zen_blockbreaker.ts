@@ -2,6 +2,7 @@ import {color3ComponentsToNumber, colorNumberTo3Components, hslToRgb, rgbNumberT
 import {cycledRequestAnimationFrame} from "common/cycled_request_animation_frame"
 import {tag} from "common/tag"
 import * as Matter from "lib/matterjs/matter"
+import {makeBottomBar} from "sketches/zen_blockbreaker/bottom_bar"
 
 const blockColors = [0x000000, 0x53bc01, 0xffeb03, 0xffa801, 0xf93a1d, 0xe21a5f, 0x572c62, 0xa1ccd3, 0x006898]
 const ballColors = blockColors.map(color => {
@@ -12,23 +13,43 @@ const ballColors = blockColors.map(color => {
 })
 
 export function main(container: HTMLElement): void {
-	const boardSize = 20
-
-	const blockbreaker = new ZenBlockbreaker({
-		ticksPerFrame: 1,
-		ballSpeed: 20,
-		// TODO: think about something more interesting here. fill the whole screen with the board..?
-		// also block size may be related to DPI
-		blockSizePx: 20,
-		height: boardSize,
-		width: boardSize,
-		sideCount: 8
-	})
+	const initialTicksPerFrame = 3
+	const speedMult = 0.5 / initialTicksPerFrame
+	const sideCount = 4
 
 	const wrap = document.createElement("div")
-	wrap.style.cssText = "width: 100%; height: 100%; display: flex; align-items: center; justify-content: center"
-	wrap.appendChild(blockbreaker.root)
+	wrap.style.cssText = "width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: space-between"
 	container.appendChild(wrap)
+
+	const bottomBar = makeBottomBar({
+		initialSpeed: initialTicksPerFrame,
+		colors: blockColors,
+		onSpeedChange: speed => blockbreaker.setTicksPerFrame(speed)
+	})
+	bottomBar.onStatsUpdate(new Map(new Array(sideCount).fill(null).map((_, i) => [i + 1, 0])))
+	wrap.appendChild(bottomBar.root)
+
+	const rect = container.getBoundingClientRect()
+	const bottomBarHeight = bottomBar.root.getBoundingClientRect().height
+	const width = rect.width
+	const height = rect.height - bottomBarHeight
+	const screenSpacePx = width * height
+	const blockSizePx = Math.floor(Math.sqrt(screenSpacePx) / 25)
+
+	const blockbreaker: ZenBlockbreaker = new ZenBlockbreaker({
+		ticksPerFrame: initialTicksPerFrame,
+		ballSpeed: speedMult * ((height + width) / blockSizePx),
+		// TODO: think about something more interesting here. fill the whole screen with the board..?
+		// also block size may be related to DPI
+		blockSizePx,
+		height: Math.floor(height / blockSizePx),
+		width: Math.floor(width / blockSizePx),
+		sideCount,
+		onStatsChange: () => bottomBar.onStatsUpdate(blockbreaker.stats)
+	})
+
+	bottomBar.root.before(blockbreaker.root)
+	bottomBar.onStatsUpdate(blockbreaker.stats)
 
 	blockbreaker.run()
 }
@@ -40,6 +61,7 @@ interface Params {
 	readonly height: number // blocks
 	readonly ballSpeed: number // blocks per second
 	readonly sideCount: number
+	onStatsChange(): void
 }
 
 /** Multiplier of matter.js scale
@@ -51,10 +73,13 @@ class ZenBlockbreaker {
 	readonly root: HTMLElement
 	private readonly matter: Matter.Engine
 	private readonly render: Matter.Render
+	private ticksPerFrame: number
+	readonly stats = new Map<number, number>()
 
 	constructor(private readonly params: Params) {
 		this.root = tag()
 
+		this.ticksPerFrame = params.ticksPerFrame
 		this.matter = Matter.Engine.create({
 			gravity: {x: 0, y: 0},
 			enableSleeping: true
@@ -68,16 +93,14 @@ class ZenBlockbreaker {
 			element: this.root,
 			engine: this.matter,
 			options: {
-				// FIXME
-				width: this.params.width * (this.params.blockSizePx + 2),
-				height: this.params.width * (this.params.blockSizePx + 2),
+				width: this.params.width * this.params.blockSizePx,
+				height: this.params.height * this.params.blockSizePx,
 				wireframes: false
 			}
 		})
 		Matter.Render.lookAt(this.render, {
-			// FIXME
-			min: {x: -1 * matterMul, y: -1 * matterMul},
-			max: {x: (this.params.width + 1) * matterMul, y: (this.params.height + 1) * matterMul}
+			min: {x: 0, y: 0},
+			max: {x: this.params.width * matterMul, y: this.params.height * matterMul}
 		})
 
 		Matter.Events.on(this.matter, "collisionEnd", (e: Matter.IEventCollision<Matter.Engine>) => {
@@ -85,6 +108,10 @@ class ZenBlockbreaker {
 				this.processCollision(pair)
 			}
 		})
+	}
+
+	setTicksPerFrame(ticksPerFrame: number): void {
+		this.ticksPerFrame = ticksPerFrame
 	}
 
 	private makeBlocks(): void {
@@ -103,7 +130,8 @@ class ZenBlockbreaker {
 				part *= this.params.sideCount
 				part = Math.floor(part)
 
-				this.makeBlock(bx, by, part + 1)
+				const color = part + 1
+				this.makeBlock(bx, by, color)
 			}
 		}
 	}
@@ -143,8 +171,9 @@ class ZenBlockbreaker {
 			// wall?
 			return
 		}
-		const [block] = blockAndColor
-		this.setBlockColor(block, ballColor)
+		const [block, blockColor] = blockAndColor
+		this.setBlockColor(block, blockColor, ballColor)
+		this.params.onStatsChange()
 	}
 
 	private setBallSpeed(ball: Matter.Body, angle: number): void {
@@ -173,16 +202,21 @@ class ZenBlockbreaker {
 			}
 		})
 
-		this.setBlockColor(block, color)
+		this.setBlockColor(block, null, color)
 
 		Matter.Composite.add(this.matter.world, [block])
 	}
 
-	private setBlockColor(block: Matter.Body, color: number): void {
-		block.render.fillStyle = rgbNumberToColorString(blockColors[color]!)
-		block.plugin.blockColor = color
-		block.collisionFilter.category = 1 << color
-		block.collisionFilter.mask = 0x8fffffff & (~(1 << color))
+	private setBlockColor(block: Matter.Body, oldColor: number | null, newColor: number): void {
+		if(oldColor !== null){
+			this.stats.set(oldColor, (this.stats.get(oldColor) ?? 0) - 1)
+		}
+		this.stats.set(newColor, (this.stats.get(newColor) ?? 0) + 1)
+
+		block.render.fillStyle = rgbNumberToColorString(blockColors[newColor]!)
+		block.plugin.blockColor = newColor
+		block.collisionFilter.category = 1 << newColor
+		block.collisionFilter.mask = 0x8fffffff & (~(1 << newColor))
 	}
 
 	private getBlockFromCollision(pair: Matter.Pair): [Matter.Body, number] | null {
@@ -287,7 +321,7 @@ class ZenBlockbreaker {
 
 			try {
 				void delta
-				for(let i = 0; i < this.params.ticksPerFrame; i++){
+				for(let i = 0; i < this.ticksPerFrame; i++){
 					Matter.Engine.update(this.matter, delta * 1000)
 				}
 			} catch(e){

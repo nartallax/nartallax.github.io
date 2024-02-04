@@ -1,0 +1,26 @@
+@import "/src/website/style/vars";
+
+.bottomBar {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	column-gap: 2rem;
+	row-gap: 0.5rem;
+	padding: 0.5rem;
+	align-items: center;
+	background-color: $foreground-secondary-color;
+	align-self: stretch;
+}
+
+.statsContainer {
+	display: flex;
+	flex-direction: row;
+	gap: 1rem;
+	font-weight: bold;
+	height: 1.25em;
+}
+
+.statEl {
+	width: 3rem;
+	overflow: hidden;
+}

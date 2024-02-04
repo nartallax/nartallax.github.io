@@ -21,6 +21,10 @@ const _tags = {
 		name: "Oimo.js",
 		description: "Physical simulation using Oimo.js engine."
 	},
+	matterjs: {
+		name: "Matter.js",
+		description: "Physical simulation using Matter.js engine."
+	},
 	tool: {
 		name: "Tool",
 		description: "A thing that helps achieving some goals."
