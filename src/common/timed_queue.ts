@@ -2,7 +2,7 @@ import {Queue} from "common/queue"
 
 /** A queue that also stores time with items.
  * Is useful when you need to store only last x seconds of something */
-export class TimeQueue<T> {
+export class TimedQueue<T> {
 	private readonly items = new Queue<{time: number, item: T}>()
 
 	enqueue(time: number, item: T): void {
@@ -19,5 +19,13 @@ export class TimeQueue<T> {
 	 * Oldest elements go first. */
 	toArray(): T[] {
 		return this.items.toArrayHeadFirst().map(x => x.item)
+	}
+
+	get head(): T | undefined {
+		return this.items.head?.item
+	}
+
+	get tail(): T | undefined {
+		return this.items.tail?.item
 	}
 }

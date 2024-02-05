@@ -47,7 +47,7 @@ function runSketchTimer(sketch: SketchDescription, container: HTMLElement, time:
 
 	function cleanup() {
 		timerEl?.remove()
-		sketchFrame?.remove()
+		// sketchFrame?.remove()
 	}
 
 	(async() => {

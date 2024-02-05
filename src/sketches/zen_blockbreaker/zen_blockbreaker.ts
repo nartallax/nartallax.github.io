@@ -38,7 +38,8 @@ export function main(container: HTMLElement): void {
 		sideCount,
 		onStatsChange: () => bottomBar.onStatsUpdate(blockbreaker.stats),
 		colors: blockColors,
-		render: "svg"
+		render: "svg",
+		tailLength: 1 * initialTicksPerFrame
 	})
 
 	bottomBar.root.before(blockbreaker.root)

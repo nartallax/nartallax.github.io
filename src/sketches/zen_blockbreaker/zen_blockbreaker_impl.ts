@@ -2,6 +2,7 @@ import {rgbNumberToColorString, transformColorHsl} from "common/color_utils"
 import {cycledRequestAnimationFrame} from "common/cycled_request_animation_frame"
 import {svgTag, tag} from "common/tag"
 import * as Matter from "lib/matterjs/matter"
+import {BallTail} from "sketches/zen_blockbreaker/ball_tail"
 
 interface Params {
 	readonly ticksPerFrame: number
@@ -12,6 +13,7 @@ interface Params {
 	readonly sideCount: number
 	readonly colors: readonly number[]
 	readonly render: "matterjs" | "svg"
+	readonly tailLength: number // seconds
 	onStatsChange(): void
 }
 
@@ -19,6 +21,7 @@ interface Ball {
 	readonly body: Matter.Body
 	readonly el: SVGCircleElement | null
 	readonly color: number
+	readonly tail: BallTail | null
 }
 
 interface Block {
@@ -41,6 +44,7 @@ export class ZenBlockbreaker {
 	readonly stats = new Map<number, number>()
 	readonly balls: Ball[] = []
 	private readonly blockColors: readonly number[]
+	private timePassed = 0
 
 	constructor(private readonly params: Params) {
 		this.blockColors = this.params.colors.map(color => transformColorHsl(color,
@@ -184,12 +188,11 @@ export class ZenBlockbreaker {
 				mask: 0
 			}
 		})
-
 		Matter.Composite.add(this.matter.world, [body])
 
-		const block: Block = {
-			body, color,
-			el: this.params.render !== "svg" ? null : svgTag({tagName: "rect",
+		let block: Block = {body, color, el: null}
+		if(this.params.render === "svg"){
+			const el = svgTag({tagName: "rect",
 				attrs: {
 					fill: "block",
 					width: 1,
@@ -197,11 +200,12 @@ export class ZenBlockbreaker {
 					x: x - 0.5,
 					y: y - 0.5
 				}})
+			this.svg!.appendChild(el)
+
+			block = {...block, el}
 		}
+
 		body.plugin.block = block
-		if(block.el){
-			this.svg!.appendChild(block.el)
-		}
 
 		this.setBlockColor(block, null, color)
 	}
@@ -257,18 +261,25 @@ export class ZenBlockbreaker {
 
 		Matter.Composite.add(this.matter.world, [body])
 
-		const ball: Ball = {
-			body,
-			color,
-			el: this.params.render !== "svg" ? null : svgTag({tagName: "circle", attrs: {
+		let ball: Ball = {body, color, el: null, tail: null}
+
+		if(this.params.render === "svg"){
+			const tailColor = rgbNumberToColorString(transformColorHsl(colorRgbSrc,
+				([h, s, l]) => [h, s * 0.9, l * 0.9]
+			))
+			const tail = new BallTail(this.params.tailLength, tailColor)
+			this.svg!.appendChild(tail.el)
+
+			const el = svgTag({tagName: "circle", attrs: {
 				cx: x, cy: y, r: 0.5, fill: colorStr
 			}})
+			this.svg!.appendChild(el)
+
+			ball = {...ball, el, tail}
 		}
+
 		body.plugin.ball = ball
 		this.balls.push(ball)
-		if(ball.el){
-			this.svg!.appendChild(ball.el)
-		}
 
 		const angle = Math.random() * Math.PI * 2
 		this.setBallSpeed(ball, angle)
@@ -326,8 +337,8 @@ export class ZenBlockbreaker {
 			}
 
 			try {
-				void delta
 				for(let i = 0; i < this.ticksPerFrame; i++){
+					this.timePassed += delta
 					Matter.Engine.update(this.matter, delta * 1000)
 				}
 				if(this.params.render === "svg"){
@@ -346,9 +357,14 @@ export class ZenBlockbreaker {
 
 	private updateBallElements(): void {
 		for(const ball of this.balls){
+			const x = ball.body.position.x / matterMul
+			const y = ball.body.position.y / matterMul
+
 			const el = ball.el!
-			el.setAttribute("cx", (ball.body.position.x / matterMul) + "")
-			el.setAttribute("cy", (ball.body.position.y / matterMul) + "")
+			el.setAttribute("cx", x + "")
+			el.setAttribute("cy", y + "")
+
+			ball.tail!.update(this.timePassed, x, y)
 		}
 	}
 }

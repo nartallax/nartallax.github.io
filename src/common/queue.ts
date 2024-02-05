@@ -17,6 +17,10 @@ export class Queue<T> {
 		return this.headNode?.value
 	}
 
+	get tail(): T | undefined {
+		return this.tailNode?.value
+	}
+
 	enqueue(value: T): void {
 		if(this.headNode && this.tailNode){
 			const oldTail = this.tailNode
