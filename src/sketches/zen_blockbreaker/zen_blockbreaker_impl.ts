@@ -340,9 +340,9 @@ export class ZenBlockbreaker {
 				for(let i = 0; i < this.ticksPerFrame; i++){
 					this.timePassed += delta
 					Matter.Engine.update(this.matter, delta * 1000)
-				}
-				if(this.params.render === "svg"){
-					this.updateBallElements()
+					if(this.params.render === "svg"){
+						this.updateBallElements()
+					}
 				}
 			} catch(e){
 				stop()
