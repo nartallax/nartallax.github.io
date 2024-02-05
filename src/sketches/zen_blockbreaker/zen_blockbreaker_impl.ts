@@ -27,7 +27,7 @@ interface Ball {
 interface Block {
 	readonly body: Matter.Body
 	readonly el: SVGRectElement | null
-	readonly color: number
+	color: number
 }
 
 /** Multiplier of matter.js scale
@@ -216,7 +216,7 @@ export class ZenBlockbreaker {
 		}
 		this.stats.set(newColor, (this.stats.get(newColor) ?? 0) + 1)
 
-		block.body.plugin.blockColor = newColor
+		block.color = newColor
 		block.body.collisionFilter.category = 1 << newColor
 		block.body.collisionFilter.mask = 0x8fffffff & (~(1 << newColor))
 
