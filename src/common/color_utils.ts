@@ -119,9 +119,9 @@ export function transformColorHsl(colorRgb: number, transform: (hsl: [number, nu
 			rgbToHsl(colorRgb)
 		)
 	)
-	transformResult[0] = Math.max(0, Math.min(255, transformResult[0]))
-	transformResult[1] = Math.max(0, Math.min(255, transformResult[1]))
-	transformResult[2] = Math.max(0, Math.min(255, transformResult[2]))
+	transformResult[0] = Math.max(0, Math.min(255, Math.round(transformResult[0])))
+	transformResult[1] = Math.max(0, Math.min(255, Math.round(transformResult[1])))
+	transformResult[2] = Math.max(0, Math.min(255, Math.round(transformResult[2])))
 	return hslToRgb(
 		color3ComponentsToNumber(
 			transformResult

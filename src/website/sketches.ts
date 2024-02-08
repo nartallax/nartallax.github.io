@@ -7,6 +7,7 @@ import planetsThumb from "sketches/planets/thumb.png"
 import particleToyThumb from "sketches/particle_toy/thumb.png"
 import waveFunctionCollapseThumb from "sketches/wave_function_collapse/thumb.png"
 import zenBlockbreakerThumb from "sketches/zen_blockbreaker/thumb.png"
+import randomRhombusTilingsThumb from "sketches/random_rhombus_tilings/thumb.png"
 import notImplementedThumb from "./default_thumbnail.png"
 
 export interface SketchDescription {
@@ -162,6 +163,19 @@ const _sketches = {
 		thumbnail: zenBlockbreakerThumb,
 		inspiration: [{
 			description: "A video without clear source found somewhere on the internet"
+		}]
+	},
+
+	random_rhombus_tilings: {
+		name: "Random rhombus tilings",
+		description: "Generator of tile patterns that uses rhombuses.",
+		date: new Date(2024, 1, 6),
+		tags: [contentTags.svg],
+		code: () => import("sketches/random_rhombus_tilings/random_rhombus_tilings"),
+		thumbnail: randomRhombusTilingsThumb,
+		inspiration: [{
+			description: "Youtube video about this type of tilings. Was curious if it really will converge to a circle when generated as described in the video.",
+			url: "https://www.youtube.com/watch?v=c6J_bd9seMg"
 		}]
 	}
 } satisfies Record<string, Omit<SketchDescription, "id">>

@@ -16,7 +16,7 @@ export function SketchPage(sketch: SketchDescription): HTMLElement {
 			const code = await sketch.code()
 			code.main(root)
 		} catch(e){
-			console.log(e)
+			console.error(e)
 			root.textContent = "Failed to load sketch."
 		}
 	})()

@@ -42,6 +42,16 @@ export class Queue<T> {
 		return result
 	}
 
+	maybeDequeue(): T | undefined {
+		if(!this.headNode){
+			return undefined
+		}
+		const result = this.headNode.value
+		this.headNode = this.headNode.prev
+		this.len--
+		return result
+	}
+
 	clear(): void {
 		this.len = 0
 		this.headNode = this.tailNode = undefined

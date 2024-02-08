@@ -30,6 +30,7 @@
 	font-weight: normal;
 	border-width: 0 2px 2px 0;
 	line-height: 1.5em;
+	max-width: 30rem;
 
 	a {
 		@extend .text-stroke;
