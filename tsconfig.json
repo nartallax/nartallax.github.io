@@ -3,6 +3,10 @@
         "./src/**/*"
     ],
 
+    "exclude": [
+        "./src/**/*.as.ts"
+    ],
+
     "compilerOptions": {
 
         "outDir": "js",
@@ -13,7 +17,6 @@
                 "./*"
             ]
         },
-
 
         "moduleResolution": "Node",
         "lib": ["ESNext", "DOM"],

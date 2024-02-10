@@ -1,4 +1,9 @@
 _old
 .parcel-cache
+.DS_Store
+js
+**.wasm
+**/wasm/*.d.ts
+**/wasm/*.js
 dist
 node_modules

@@ -13,25 +13,27 @@
   },
   "homepage": "https://github.com/nartallax/nartallax.github.io#readme",
   "devDependencies": {
-    "@nartallax/parcel-packager-js-with-circular-dep-resolving": "^2.8.2-alpha.8",
     "@parcel/transformer-glsl": "^2.8.2",
     "@parcel/transformer-sass": "^2.8.2",
-    "@types/node": "^18.11.17",
+    "@types/node": "^18.19.15",
     "@types/pako": "^2.0.0",
     "@types/three": "^0.138.0",
     "@typescript-eslint/eslint-plugin": "^4.30.0",
     "@typescript-eslint/parser": "^4.30.0",
+    "assemblyscript": "^0.27.24",
     "eslint": "^7.32.0",
     "parcel": "^2.8.2",
     "parcel-resolver-ts-base-url": "^1.3.1",
-    "process": "^0.11.10",
-    "tsc": "^2.0.3",
     "typescript": "^4.9.4"
   },
   "scripts": {
-    "dev": "./scripts/dev.sh",
-    "release": "./scripts/release.sh",
-    "test": "./scripts/test.sh"
+    "wasm:rhombus_tilings": "cd ./src/sketches/random_rhombus_tilings/wasm/ && npx asc ./rhombus_randomizer.as.ts --outFile ./rhombus_randomiser.wasm --bindings raw && cd - > /dev/null",
+    "wasm": "npm run wasm:rhombus_tilings",
+    "clear": "rm -rf dist 2> /dev/null && rm -rf .parcel-cache 2> /dev/null && rm -rf docs 2> /dev/null",
+    "dev": "npm run clear && npm run wasm && npx parcel serve --target dev --no-cache --no-hmr",
+    "typecheck": "npx tsc --project ./tsconfig.json --noEmit",
+    "release": "npm run clear && npm run typecheck && npm run wasm && npx parcel build --target release --no-cache && npm run release:static",
+    "release:static": "cp ./robots.txt ./docs/ && cp ./sitemap.xml ./docs/"
   },
   "targets": {
     "dev": {
@@ -41,12 +43,6 @@
     "release": {
       "distDir": "./docs",
       "source": "./src/website/index.html"
-    },
-    "test": {
-      "distDir": "./docs",
-      "context": "node",
-      "source": "src/test/test_main.ts",
-      "optimize": false
     }
   },
   "dependencies": {

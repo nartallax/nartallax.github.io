@@ -98,7 +98,7 @@ export const tileWithRandomRhombuses = (grid: RhombusGrid): void => {
 		updateNeighbours(xy)
 	}
 
-	for(let i = 0; i < grid.count * 100; i++){
+	for(let i = 0; i < grid.count * 1; i++){
 		if(flippables.size === 0){
 			console.log("no flip candidate????")
 			break

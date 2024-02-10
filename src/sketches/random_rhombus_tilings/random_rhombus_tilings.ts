@@ -2,14 +2,18 @@ import {renderRhombuses} from "sketches/random_rhombus_tilings/rhombus_tiling_re
 import {getEmptyRhombusPattern, tileWithRandomRhombuses} from "sketches/random_rhombus_tilings/rhombus_tiling"
 import {transformColorHsl} from "common/color_utils"
 import {performeter} from "common/perfometer"
+import {getWasmRhombusRandomiser} from "sketches/random_rhombus_tilings/rhombus_randomizer.binding"
 
 const colors = [0x53bc01, 0xffeb03, 0xffa801, 0xf93a1d, 0xe21a5f, 0x572c62, 0xa1ccd3, 0x006898]
 
 export function main(container: HTMLElement): void {
+	getWasmRhombusRandomiser().then(x => console.log(x.addTwoNumbers(2, 3)))
+	performeter.enterBlock("initializing")
 	const grid = getEmptyRhombusPattern({width: 25, height: 25, length: 25})
 
-	performeter.enterBlock("randomizing")
+	performeter.exitEnterBlock("randomizing")
 	tileWithRandomRhombuses(grid)
+
 	performeter.exitEnterBlock("drawing")
 
 	const color = colors[Math.floor(Math.random() * colors.length)]!
