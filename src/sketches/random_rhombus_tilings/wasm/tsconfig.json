@@ -1,9 +1,16 @@
 {
+	// this file only exists because we can't mix AS and TS
+	// AS typings (with i32 and other stuff) are marked as default library 
+	// (see triple-slash reference in its .d.ts)
+	// that is, we can't load other default libraries (like DOM) if that one is present
+	// so we are bound to have two TS projects - one for AS world, and other for TS
+
 	"extends": "assemblyscript/std/assembly.json",
 	"include": [
 	  "./**/*.as.ts"
 	],
 	"compilerOptions": {
+		// just to avoid making JS when we don't need it
 		"noEmit": true
 	}
   }

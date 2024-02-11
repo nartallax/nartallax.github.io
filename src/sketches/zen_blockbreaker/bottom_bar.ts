@@ -1,49 +1,44 @@
-import {rgbNumberToColorString} from "common/color_utils"
-import {makeSlider} from "common/slider/slider"
+import {makeBottomBarredScreenContainer} from "common/bottom_bar/bottom_bar"
+import {RBox, WBox} from "common/box"
+import {Slider} from "common/slider/slider"
 import {tag} from "common/tag"
-import * as css from "./bottom_bar.module.scss"
+import {Textblock} from "common/textblock"
 
 interface Props {
-	readonly initialSpeed: number
+	readonly speed: WBox<number>
+	readonly stats: RBox<number>[]
 	colors: readonly number[]
-	onSpeedChange(newSpeedValue: number): void
-}
-
-interface BottomBar {
 	root: HTMLElement
-	onStatsUpdate(newStats: ReadonlyMap<number, number>): void
 }
 
-export const makeBottomBar = (props: Props): BottomBar => {
-	const bar = tag({class: css.bottomBar})
+export const makeBottomBar = (props: Props): HTMLElement => {
 
-	const slider = makeSlider({
+	const slider = Slider({
+		label: "Speed",
 		min: 0,
 		max: 25,
-		startValue: props.initialSpeed,
-		onChange: props.onSpeedChange,
+		value: props.speed,
 		step: 1
 	})
-	bar.appendChild(slider)
 
-	const statEls = new Map<number, HTMLElement>()
-	const statsContainer = tag({class: css.statsContainer})
-	bar.appendChild(statsContainer)
-	function onStatsUpdate(stats: ReadonlyMap<number, number>): void {
-		for(const [color, value] of stats){
-			let statEl = statEls.get(color)
-			if(!statEl){
-				statEl = tag({
-					class: css.statEl,
-					style: {color: rgbNumberToColorString(props.colors[color] ?? 0)}
-				})
-				statsContainer.appendChild(statEl)
-				statEls.set(color, statEl)
-			}
-			statEl.textContent = value + ""
+	const stats = tag({
+		style: {
+			display: "flex",
+			flexDirection: "row",
+			gap: "1rem",
+			fontWeight: "bold",
+			height: "1.25em"
 		}
-	}
+	}, props.stats.map((stat, i) => Textblock({
+		value: stat,
+		color: props.colors[i + 1],
+		bold: true,
+		overflow: "hidden",
+		width: "3em"
+	})))
 
-
-	return {root: bar, onStatsUpdate}
+	return makeBottomBarredScreenContainer({
+		contents: [slider, stats],
+		parent: props.root
+	})
 }

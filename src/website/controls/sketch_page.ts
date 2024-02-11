@@ -21,6 +21,7 @@ export function SketchPage(sketch: SketchDescription): HTMLElement {
 		}
 	})()
 
+	// TODO: two roots? wtf
 	return tag({class: css.sketchRoot}, [
 		root,
 		noSketchInfo ? null : SketchInfoButton(sketch)

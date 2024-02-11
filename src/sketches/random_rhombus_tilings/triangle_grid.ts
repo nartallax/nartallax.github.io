@@ -39,30 +39,39 @@ export class TriangleGrid<T> {
 		}
 		this.xWidth = props.length + props.width - 1
 		this.yHeight = (this.xWidth / 2) + props.height
-		this.topCornerColumnX = this.props.width - 1
-		let count = 0
+		this.topCornerColumnX = this.props.length - 1
+		this.count = TriangleGrid.getCount(this.props.length, this.props.width, this.props.height)
 		this.values = new Array(this.xWidth)
 			.fill(null)
-			.map((_, x) => {
-				const height = this.getHeightOfColumnAt(x)
-				count += height
-				return new Array(height)
-					.fill(null)
-					.map(() => props.defaultValue)
-			})
-		this.count = count
+			.map((_, x) => new Array(this.getHeightOfColumnAt(x))
+				.fill(null)
+				.map(() => props.defaultValue)
+			)
+	}
+
+	static getCount(length: number, width: number, height: number): number {
+		let result = 0
+		const xWidth = length + width - 1
+		for(let x = 0; x < xWidth; x++){
+			result += this.getHeightOfColumnAt(length, width, height, x)
+		}
+		return result
+	}
+
+	static getHeightOfColumnAt(length: number, width: number, height: number, x: number): number {
+		let result = height
+		if(x < length && x < width){
+			result += x
+		} else if((x < length) !== (x < width)){
+			result += Math.min(length, width) - 1
+		} else {
+			result += (length + width - 1) - 1 - x
+		}
+		return result
 	}
 
 	getHeightOfColumnAt(x: number): number {
-		let result = this.props.height
-		if(x < this.props.length && x < this.props.width){
-			result += x
-		} else if((x < this.props.length) !== (x < this.props.width)){
-			result += Math.min(this.props.length, this.props.width) - 1
-		} else {
-			result += this.xWidth - 1 - x
-		}
-		return result
+		return TriangleGrid.getHeightOfColumnAt(this.props.length, this.props.width, this.props.height, x)
 	}
 
 	* [Symbol.iterator](): IterableIterator<{x: number, y: number, value: T}> {
@@ -193,6 +202,5 @@ export class TriangleGrid<T> {
 			next = queue.maybeDequeue()
 		}
 	}
-
 
 }

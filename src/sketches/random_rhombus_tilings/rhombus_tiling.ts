@@ -11,6 +11,49 @@ export interface TriangleGridRhombusNode {
 
 export type RhombusGrid = TriangleGrid<TriangleGridRhombusNode>
 
+export function rhombusGridToBytes(grid: RhombusGrid): Uint8Array {
+	const result = new Uint8Array(grid.count)
+	const colStarts = calcColStarts(grid)
+
+	for(const {x, y, value: {bottomIsSolid, leftIsSolid, rightIsSolid}} of grid){
+		const value = (rightIsSolid ? 1 : 0) | (bottomIsSolid ? 2 : 0) | (leftIsSolid ? 4 : 0)
+		const index = colStarts[x]! + y
+		result[index] = value
+	}
+
+	return result
+}
+
+export function rhombusGridFromBytes(bytes: Uint8Array, props: {width: number, height: number, length: number}): RhombusGrid {
+	const grid = new TriangleGrid({
+		...props,
+		defaultValue: {
+			leftIsSolid: false,
+			rightIsSolid: false,
+			bottomIsSolid: false
+		}
+	})
+	const colStarts = calcColStarts(grid)
+	for(const xy of grid){
+		const index = colStarts[xy.x]! + xy.y
+		const byte = bytes[index]!
+		grid.set(xy, {
+			rightIsSolid: (byte & 1) !== 0,
+			bottomIsSolid: (byte & 2) !== 0,
+			leftIsSolid: (byte & 4) !== 0
+		})
+	}
+	return grid
+}
+
+function calcColStarts(grid: RhombusGrid): number[] {
+	const colStarts: number[] = new Array(grid.xWidth).fill(0)
+	for(let x = 1; x < grid.xWidth; x++){
+		colStarts[x] = colStarts[x - 1]! + grid.getHeightOfColumnAt(x - 1)
+	}
+	return colStarts
+}
+
 // horisontal places at the bottom
 export const getEmptyRhombusPattern = (props: {width: number, height: number, length: number}): RhombusGrid => {
 	const grid = new TriangleGrid<TriangleGridRhombusNode>({
@@ -42,7 +85,7 @@ export const getEmptyRhombusPattern = (props: {width: number, height: number, le
 	return grid
 }
 
-export const tileWithRandomRhombuses = (grid: RhombusGrid): void => {
+export const tileWithRandomRhombuses = (grid: RhombusGrid, flipLimit: number): void => {
 	const flippables = new Set<number>([encodeXY(grid.getCenterCornerCoords())])
 
 	const updateNeighbours = (sourceXy: XY) => {
@@ -98,7 +141,7 @@ export const tileWithRandomRhombuses = (grid: RhombusGrid): void => {
 		updateNeighbours(xy)
 	}
 
-	for(let i = 0; i < grid.count * 1; i++){
+	for(let i = 0; i < flipLimit; i++){
 		if(flippables.size === 0){
 			console.log("no flip candidate????")
 			break

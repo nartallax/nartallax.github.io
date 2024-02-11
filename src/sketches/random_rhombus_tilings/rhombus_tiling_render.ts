@@ -106,9 +106,11 @@ export const renderRhombuses = (props: Props): SVGSVGElement => {
 }
 
 // that's mostly for debug
-export const renderRhombusDots = (grid: TriangleGrid<unknown>): SVGSVGElement => {
+export const renderRhombusDots = (grid: TriangleGrid<unknown>, getNeighbours?: (xy: XY) => XY[]): SVGSVGElement => {
 	const cellSizePx = 20
 	const dotSizePx = 10
+
+	const doGetNeighbours = getNeighbours ?? (xy => grid.getValidNeighbourCoords(xy))
 
 	const svg = svgTag({tagName: "svg"})
 	svg.setAttribute("width", grid.xWidth + "")
@@ -129,10 +131,10 @@ export const renderRhombusDots = (grid: TriangleGrid<unknown>): SVGSVGElement =>
 		}
 	}
 
-	const showNeighbours = (xy: XY) => grid.getValidNeighbourCoords(xy)
+	const showNeighbours = (xy: XY) => doGetNeighbours(xy)
 		.forEach(xy => setColor(xy, "red"))
 
-	const hideNeighbours = (xy: XY) => grid.getValidNeighbourCoords(xy)
+	const hideNeighbours = (xy: XY) => doGetNeighbours(xy)
 		.forEach(xy => setColor(xy, "white"))
 
 	for(const xy of grid){

@@ -1,45 +1,56 @@
+import {getBinder} from "common/binder/binder"
+import {box, isRBox, MaybeRBoxed, WBox} from "common/box"
 import {addCursorMoveHandler, pointerEventsToClientCoords} from "common/input_utils"
 import {tag} from "common/tag"
 import * as css from "./slider.module.scss"
 
 interface Props {
-	readonly min: number
-	readonly max: number
+	readonly min: MaybeRBoxed<number>
+	readonly max: MaybeRBoxed<number>
 	readonly step?: number
-	readonly startValue: number
-	onChange(newValue: number): void
+	readonly value: WBox<number>
+	readonly label?: MaybeRBoxed<string>
+	readonly labelWidth?: MaybeRBoxed<number | string>
 }
 
-export const makeSlider = (props: Props): HTMLElement => {
-	const root = tag({class: css.slider})
+export const Slider = (props: Props): HTMLElement => {
+	const min = isRBox(props.min) ? props.min : box(props.min)
+	const max = isRBox(props.max) ? props.max : box(props.max)
+
 	const handle = tag({class: css.handle})
-	root.appendChild(handle)
-	let value = Number.NaN
+	const handleContainer = tag({class: css.handleContainer}, [handle])
+	let root = tag({class: css.slider}, [handleContainer])
+	if(props.label){
+		const labelWidth = isRBox(props.labelWidth) ? props.labelWidth : box(props.labelWidth)
+		root = tag({class: css.sliderRoot}, [
+			tag({
+				class: css.label,
+				text: props.label,
+				style: {
+					width: labelWidth.map(x => typeof(x) === "number" ? x + "px" : x ?? "")
+				}
+			}),
+			root
+		])
+	}
 
-	function setValue(newValue: number): void {
-		if(newValue === value){
-			return
-		}
-
-		value = Math.min(props.max, Math.max(props.min, newValue))
-		handle.style.left = (((value - props.min) / (props.max - props.min)) * 100) + "%"
+	function updateHandlePos(newValue: number): void {
+		handle.style.left = (((newValue - min()) / (max() - min())) * 100) + "%"
 	}
 
 	function setValueByEvent(e: MouseEvent | TouchEvent): void {
 		const coords = pointerEventsToClientCoords(e)
-		const rootRect = root.getBoundingClientRect()
+		const contRect = handleContainer.getBoundingClientRect()
 
-		const progress = (coords.x - rootRect.left) / rootRect.width
-		let newValue = (progress * (props.max - props.min)) + props.min
+		let progress = (coords.x - contRect.left) / contRect.width
+		progress = Math.min(1, Math.max(0, progress))
+		let newValue = (progress * (max() - min())) + min()
 		if(props.step){
 			newValue = Math.round(newValue / props.step) * props.step
 		}
 
-		setValue(newValue)
-		props.onChange(value)
+		props.value(newValue)
 	}
-
-	setValue(props.startValue)
 
 	addCursorMoveHandler({
 		element: handle,
@@ -55,6 +66,23 @@ export const makeSlider = (props: Props): HTMLElement => {
 	}
 
 	root.addEventListener("click", onSliderBodyClick)
+
+	const binder = getBinder(root)
+	binder.watchAndRun(props.value, value => updateHandlePos(value))
+	binder.watchAndRun(max, max => {
+		if(props.value() > max){
+			props.value(max)
+		} else {
+			updateHandlePos(props.value())
+		}
+	})
+	binder.watchAndRun(min, min => {
+		if(props.value() < min){
+			props.value(min)
+		} else {
+			updateHandlePos(props.value())
+		}
+	})
 
 	return root
 }
