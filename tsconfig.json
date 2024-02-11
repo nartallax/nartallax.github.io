@@ -4,6 +4,7 @@
     ],
 
     "exclude": [
+        // AS is handled by separate project(s) near their sources
         "./src/**/*.as.ts"
     ],
 

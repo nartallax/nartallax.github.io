@@ -8,6 +8,7 @@ const flipMarkBit: u8 = 8
 
 export class RhombusRandomTiler {
 	private flippableCount: i32 = 0
+	private readonly flippables: Set<i32> = new Set<i32>()
 
 	constructor(private readonly grid: TriangleGrid, private readonly flipLimit: i32) {}
 
@@ -15,19 +16,23 @@ export class RhombusRandomTiler {
 		if(index === -1){
 			return
 		}
-		const value = this.grid.values[index]
+		// const value = this.grid.values[index]
 		const isFlippable = this.isFlippable(index)
 
-		if(isFlippable && (value & flipMarkBit) === 0){
+		// if(isFlippable && (value & flipMarkBit) === 0){
+		if(isFlippable && !this.flippables.has(index)){
 			this.flippableCount++
-			this.grid.values[index] = value | flipMarkBit
+			// this.grid.values[index] = value | flipMarkBit
+			this.flippables.add(index)
 			// console.log(`${this.grid.xOfIndex(index)}, ${this.grid.yOfIndex(index)} is now flippable`)
 			return
 		}
 
-		if(!isFlippable && (value & flipMarkBit) !== 0){
+		// if(!isFlippable && (value & flipMarkBit) !== 0){
+		if(!isFlippable && this.flippables.has(index)){
 			this.flippableCount--
-			this.grid.values[index] = value & (~flipMarkBit)
+			// this.grid.values[index] = value & (~flipMarkBit)
+			this.flippables.delete(index)
 			// console.log(`${this.grid.xOfIndex(index)}, ${this.grid.yOfIndex(index)} is no more flippable`)
 		}
 	}
@@ -100,21 +105,29 @@ export class RhombusRandomTiler {
 	}
 
 	private findRandomFlippableIndex(): i32 {
-		if(this.flippableCount === 0){
-			throw new Error("No flip candidate")
-		}
-		let skips = i32(Math.random() * this.flippableCount)
-		for(let i = 0; i < this.grid.values.length; i++){
-			// TODO: optimize iteration
-			if(this.grid.values[i] & flipMarkBit){
-				if(skips === 0){
-					// console.log(`Selected value ${this.grid.values[i]} at index ${i} (${this.grid.xOfIndex(i)}, ${this.grid.yOfIndex(i)})`)
-					return i
-				}
-				skips--
-			}
-		}
-		throw new Error("Flippable count is wrong")
+		const arr = this.flippables.values()
+		return arr[i32(Math.random() * arr.length)]
+		// if(this.flippableCount === 0){
+		// 	throw new Error("No flip candidate")
+		// }
+		// let skips = i32(Math.random() * this.flippableCount)
+		// let x = 0
+		// for(let i = 0; i < this.grid.values.length; i++){
+		// 	const y = this.grid.yOfIndex(i)
+		// 	if(y >= this.grid.colHeights[x]){
+		// 		x++
+		// 		i = this.grid.indexOf(x, 0)
+		// 		continue
+		// 	}
+		// 	if(this.grid.values[i] & flipMarkBit){
+		// 		if(skips === 0){
+		// 			// console.log(`Selected value ${this.grid.values[i]} at index ${i} (${this.grid.xOfIndex(i)}, ${this.grid.yOfIndex(i)})`)
+		// 			return i
+		// 		}
+		// 		skips--
+		// 	}
+		// }
+		// throw new Error("Flippable count is wrong")
 	}
 
 	private markFlippables(): void {

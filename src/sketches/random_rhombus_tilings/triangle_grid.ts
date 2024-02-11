@@ -85,8 +85,7 @@ export class TriangleGrid<T> {
 
 	/** @returns difference between y coord of highest point of the whole rhombus and y coords the highest point in this column, in cells */
 	getVerticalOffset(x: number): number {
-		const topPointX = this.props.length - 1
-		return Math.abs(topPointX - x) / 2
+		return Math.abs(this.topCornerColumnX - x) / 2
 	}
 
 	getCenterCornerCoords(): XY {

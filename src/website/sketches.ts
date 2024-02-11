@@ -24,8 +24,12 @@ export interface SketchDescription {
 	readonly infoButtonPosition?: "topLeft" | "topRight" | "bottomLeft" | "bottomRight"
 }
 
+interface SketchParams {
+	isPreview: boolean
+}
+
 interface SketchObject {
-	main(root: HTMLElement): void
+	main(root: HTMLElement, params: SketchParams): void
 }
 
 export interface ContentReference {

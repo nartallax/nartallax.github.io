@@ -1,5 +1,5 @@
-import {renderRhombusDots, renderRhombuses} from "sketches/random_rhombus_tilings/rhombus_tiling_render"
-import {getEmptyRhombusPattern, rhombusGridFromBytes, rhombusGridToBytes, tileWithRandomRhombuses} from "sketches/random_rhombus_tilings/rhombus_tiling"
+import {renderRhombuses} from "sketches/random_rhombus_tilings/rhombus_tiling_render"
+import {getEmptyRhombusPattern, rhombusGridFromBytes, rhombusGridToBytes} from "sketches/random_rhombus_tilings/rhombus_tiling"
 import {transformColorHsl} from "common/color_utils"
 import {performeter} from "common/perfometer"
 import {getWasmRhombusRandomiser, WasmRhombusRandomiser} from "sketches/random_rhombus_tilings/rhombus_randomizer.binding"
@@ -12,11 +12,11 @@ import {tag} from "common/tag"
 import {debounce} from "common/debounce"
 
 const colors = [0x53bc01, 0xffeb03, 0xffa801, 0xf93a1d, 0xe21a5f, 0x572c62, 0xa1ccd3, 0x006898] as const
-const defaultDims = {width: 25, height: 25, length: 25}
-const defaultSteps = TriangleGrid.getCount(defaultDims.length, defaultDims.width, defaultDims.height) * 100
-// const defaultSteps = 20 - 1
+const defaultDims = {width: 10, height: 10, length: 10}
+const defaultSteps = Math.floor(TriangleGrid.getCount(defaultDims.length, defaultDims.width, defaultDims.height) * 10)
+const defaultSeed = Math.floor(Math.random() * 0x8fffffff)
 
-export async function main(container: HTMLElement): Promise<void> {
+export async function main(container: HTMLElement, {isPreview}: {isPreview: boolean}): Promise<void> {
 	const randomizer = await getWasmRhombusRandomiser()
 	const redraw = makeUpdater(() => root, randomizer)
 	const debouncedRedraw = debounce("raf", () => redraw(props))
@@ -25,17 +25,17 @@ export async function main(container: HTMLElement): Promise<void> {
 	const maxSteps = box(steps())
 	const props = {
 		color: box(colors[Math.floor(Math.random() * colors.length)]!),
-		seed: box(122258684),
+		seed: box(defaultSeed),
 		steps, maxSteps,
 		height: box(defaultDims.height),
 		width: box(defaultDims.width),
 		length: box(defaultDims.length)
 	}
-	const root = bottomBar(container, props)
+	const root = isPreview ? container : bottomBar(container, props)
 
 	const update = () => {
 		debouncedRedraw()
-		maxSteps(TriangleGrid.getCount(props.length(), props.width(), props.height()) ** 1.5)
+		maxSteps(Math.floor(TriangleGrid.getCount(props.length(), props.width(), props.height()) ** 1.5))
 	}
 	update()
 
@@ -121,7 +121,7 @@ interface BarProps {
 }
 
 const labelWidth = 60
-const maxDim = 100
+const maxDim = 50
 
 function bottomBar(root: HTMLElement, props: BarProps): HTMLElement {
 	return makeBottomBarredScreenContainer({

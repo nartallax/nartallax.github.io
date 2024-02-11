@@ -22,7 +22,7 @@ export const renderRhombuses = (props: Props): SVGSVGElement => {
 	svg.style.height = ((grid.yHeight + 0.5) * props.cellSize.y) + "px"
 
 	const strokeWidth = 2 / (props.cellSize.x + props.cellSize.y)
-	const makePathMaker = (color: number, expr: (x: number, y: number) => string) => (x: number, y: number): SVGPathElement => {
+	const makePathMaker = (color: number, name: string, expr: (x: number, y: number) => string) => (x: number, y: number): SVGPathElement => {
 		let offset = grid.getVerticalOffset(Math.max(0, Math.min(grid.xWidth - 1, x)))
 		if(x < 0 || x >= grid.xWidth){
 			offset += 0.5
@@ -30,6 +30,7 @@ export const renderRhombuses = (props: Props): SVGSVGElement => {
 		return svgTag({
 			tagName: "path",
 			attrs: {
+				"data-name": `${name} at ${x},${y} with offset ${offset}`,
 				d: expr(x, y + offset),
 				fill: rgbNumberToColorString(color),
 				// strokes are only required to fill small gaps between the elements
@@ -42,14 +43,17 @@ export const renderRhombuses = (props: Props): SVGSVGElement => {
 
 	const makeLeft = makePathMaker(
 		props.leftColor,
+		"left",
 		(x, y) => `M ${x} ${y} V ${y - 1} L ${x - 1} ${y - 0.5} V ${y + 0.5} z`)
 
 	const makeRight = makePathMaker(
 		props.rightColor,
+		"right",
 		(x, y) => `M ${x} ${y} V ${y - 1} L ${x + 1} ${y - 0.5} V ${y + 0.5} z`)
 
 	const makeBottom = makePathMaker(
 		props.horisontalColor,
+		"bottom",
 		(x, y) => `M ${x} ${y} L ${x - 1} ${y + 0.5} L ${x} ${y + 1} L ${x + 1} ${y + 0.5} z`)
 
 	for(const {x, y, value: {leftIsSolid, rightIsSolid, bottomIsSolid}} of props.grid){
@@ -81,12 +85,12 @@ export const renderRhombuses = (props: Props): SVGSVGElement => {
 	})
 
 	grid.exploreFrom(grid.getRightBottomCornerCoords(), xy => {
-		grid.get(xy).bottomIsSolid || svg.appendChild(makeLeft(xy.x + 1, xy.y))
+		grid.get(xy).bottomIsSolid || svg.appendChild(makeLeft(xy.x + 1, xy.y + (xy.x < grid.topCornerColumnX ? 1 : 0)))
 		return [grid.getBottomLeftOf(xy)]
 	})
 
 	grid.exploreFrom(grid.getLeftBottomCornerCoords(), xy => {
-		grid.get(xy).bottomIsSolid || svg.appendChild(makeRight(xy.x - 1, xy.y))
+		grid.get(xy).bottomIsSolid || svg.appendChild(makeRight(xy.x - 1, xy.y + (xy.x > grid.topCornerColumnX ? 1 : 0)))
 		return [grid.getBottomRightOf(xy)]
 	})
 

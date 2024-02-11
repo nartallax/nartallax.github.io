@@ -4,13 +4,14 @@
  *
  * This class also contains utility related arithmetic functions.  */
 export class TriangleGrid {
-	private readonly xWidth: i32
-	private readonly yHeight: i32
+	private readonly arrayWidth: i32
+	private readonly arrayHeight: i32
 	/** X coord of column that has highest grid point */
 	readonly topCornerColumnX: i32
 	readonly values: Uint8Array
 	readonly count: i32
 	readonly colHeights: Int32Array
+	private readonly hPow: i32
 
 	constructor(
 		private readonly length: i32, // left side distance
@@ -20,19 +21,17 @@ export class TriangleGrid {
 	) {
 		this.count = compactValues.length
 
-		const xWidth: i32 = length + width - 1
-		// TODO: don't round up here, it's supposed to be float. throw this prop away, it's confusing
-		const yHeight: i32 = (xWidth + (xWidth & 1)) / 2 + height
-		this.xWidth = xWidth
-		this.yHeight = yHeight
+		const arrayWidth: i32 = length + width - 1
+		let arrayHeight = height + (length < width ? length : width) - 1
+		const hPow = i32(Math.ceil(Math.log2(arrayHeight)))
+		arrayHeight = 2 ** hPow
+		this.hPow = hPow
+		this.arrayWidth = arrayWidth
+		this.arrayHeight = arrayHeight
 		this.topCornerColumnX = length - 1
 
-		// TODO: try aligning array height to power-of-two
-		// this will allow index <---> coords conversion to be bitwise operations
-		// and may possibly save a lot of time
-		// TODO: also don't use yHeight, it's bigger than max column height we need here
-		this.values = new Uint8Array(xWidth * yHeight)
-		this.colHeights = new Int32Array(xWidth)
+		this.values = new Uint8Array(arrayWidth * arrayHeight)
+		this.colHeights = new Int32Array(arrayWidth)
 
 		for(let x = 0; x < this.colHeights.length; x++){
 			this.colHeights[x] = this.getHeightOfColumnAt(x)
@@ -73,15 +72,15 @@ export class TriangleGrid {
 	}
 
 	indexOf(x: i32, y: i32): i32 {
-		return (x * this.yHeight) + y
+		return (x << this.hPow) | y
 	}
 
 	xOfIndex(index: i32): i32 {
-		return (index - (index % this.yHeight)) / this.yHeight
+		return index >> this.hPow
 	}
 
 	yOfIndex(index: i32): i32 {
-		return index % this.yHeight
+		return index & ((1 << this.hPow) - 1)
 	}
 
 	getHeightOfColumnAt(x: i32): i32 {
@@ -92,7 +91,7 @@ export class TriangleGrid {
 			const minSide = this.length < this.width ? this.length : this.width
 			result += minSide - 1
 		} else {
-			result += this.xWidth - 1 - x
+			result += this.arrayWidth - 1 - x
 		}
 		return result
 	}
@@ -127,7 +126,7 @@ export class TriangleGrid {
 		if(x >= this.topCornerColumnX){
 			y--
 		}
-		return x === this.xWidth - 1 || y < 0 ? -1 : this.indexOf(x + 1, y)
+		return x === this.arrayWidth - 1 || y < 0 ? -1 : this.indexOf(x + 1, y)
 	}
 
 	getBottomRightOf(index: i32): i32 {
@@ -136,15 +135,15 @@ export class TriangleGrid {
 		if(x < this.topCornerColumnX){
 			y++
 		}
-		return x === this.xWidth - 1 || y === this.colHeights[x + 1] ? -1 : this.indexOf(x + 1, y)
+		return x === this.arrayWidth - 1 || y === this.colHeights[x + 1] ? -1 : this.indexOf(x + 1, y)
 	}
 
 	getTopOf(index: i32): i32 {
-		return (index % this.yHeight) === 0 ? -1 : index - 1
+		return this.yOfIndex(index) === 0 ? -1 : index - 1
 	}
 
 	getBottomOf(index: i32): i32 {
 		const y = this.yOfIndex(index)
-		return (y === this.colHeights[this.xOfIndex(index)] - 1) ? -1 : index + 1
+		return (y >= this.colHeights[this.xOfIndex(index)] - 1) ? -1 : index + 1
 	}
 }

@@ -27,7 +27,7 @@
     "typescript": "^4.9.4"
   },
   "scripts": {
-    "wasm:rhombus_tilings": "cd ./src/sketches/random_rhombus_tilings/wasm/ && npx asc ./rhombus_randomizer.as.ts --outFile ./rhombus_randomiser.wasm --bindings raw && cd - > /dev/null",
+    "wasm:rhombus_tilings": "cd ./src/sketches/random_rhombus_tilings/wasm/ && npx asc ./rhombus_randomizer.as.ts --outFile ./rhombus_randomiser.wasm --bindings raw --sourceMap --optimizeLevel 3 --shrinkLevel 2 --converge --noAssert && cd - > /dev/null && scripts/fix_asc_bindings.js ./src/sketches/random_rhombus_tilings/wasm/rhombus_randomiser",
     "wasm": "npm run wasm:rhombus_tilings",
     "clear": "rm -rf dist 2> /dev/null && rm -rf .parcel-cache 2> /dev/null && rm -rf docs 2> /dev/null",
     "dev": "npm run clear && npm run wasm && npx parcel serve --target dev --no-cache --no-hmr",
