@@ -1,5 +1,5 @@
+import {svgTag} from "@nartallax/cardboard-dom"
 import {rgbNumberToColorString} from "common/color_utils"
-import {svgTag} from "common/tag"
 import {RhombusGrid} from "sketches/random_rhombus_tilings/rhombus_tiling"
 import {TriangleGrid, XY} from "sketches/random_rhombus_tilings/triangle_grid"
 
@@ -13,7 +13,7 @@ interface Props {
 
 export const renderRhombuses = (props: Props): SVGSVGElement => {
 	const grid = props.grid
-	const svg = svgTag({tagName: "svg"})
+	const svg = svgTag({tag: "svg"})
 
 	svg.setAttribute("width", grid.xWidth + "")
 	svg.setAttribute("height", grid.yHeight + "")
@@ -28,7 +28,7 @@ export const renderRhombuses = (props: Props): SVGSVGElement => {
 			offset += 0.5
 		}
 		return svgTag({
-			tagName: "path",
+			tag: "path",
 			attrs: {
 				"data-name": `${name} at ${x},${y} with offset ${offset}`,
 				d: expr(x, y + offset),
@@ -116,7 +116,7 @@ export const renderRhombusDots = (grid: TriangleGrid<unknown>, getNeighbours?: (
 
 	const doGetNeighbours = getNeighbours ?? (xy => grid.getValidNeighbourCoords(xy))
 
-	const svg = svgTag({tagName: "svg"})
+	const svg = svgTag({tag: "svg"})
 	svg.setAttribute("width", grid.xWidth + "")
 	svg.setAttribute("height", grid.yHeight + "")
 	svg.setAttribute("viewBox", `-1 -1 ${grid.xWidth + 1} ${grid.yHeight + 1}`)
@@ -143,7 +143,7 @@ export const renderRhombusDots = (grid: TriangleGrid<unknown>, getNeighbours?: (
 
 	for(const xy of grid){
 		const circle = svgTag({
-			tagName: "circle",
+			tag: "circle",
 			attrs: {
 				id: `circle-${xy.x}-${xy.y}`,
 				cx: xy.x,

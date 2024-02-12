@@ -1,4 +1,4 @@
-import {tag} from "common/tag"
+import {tag} from "@nartallax/cardboard-dom"
 import * as css from "./timer.module.scss"
 
 const twoDigis = (x: number): string => x < 10 ? "0" + x : "" + x
@@ -81,14 +81,14 @@ export function main(root: HTMLElement): void {
 	const timeEl = tag({class: css.timer})
 	wrap.appendChild(timeEl)
 
-	const resetBtn = tag({tagName: "button", text: "reset", class: css.button})
+	const resetBtn = tag({tag: "button", class: css.button}, ["reset"])
 	resetBtn.addEventListener("click", () => {
 		timeAcc = 0
 		updateText()
 	})
 	wrap.appendChild(resetBtn)
 
-	const pauseBtn = tag({tagName: "button", text: "pause", class: css.button})
+	const pauseBtn = tag({tag: "button", class: css.button}, ["pause"])
 	pauseBtn.addEventListener("click", () => {
 		if(paused){
 			paused = false
@@ -100,8 +100,8 @@ export function main(root: HTMLElement): void {
 	})
 	wrap.appendChild(pauseBtn)
 
-	const speedBlock = tag({class: css.speedBlock, text: "Speed: "})
-	const speedInput = tag({tagName: "input", attrs: {type: "number", value: 1}, class: css.speedInput})
+	const speedBlock = tag({class: css.speedBlock}, ["Speed: "])
+	const speedInput = tag({tag: "input", attrs: {type: "number", value: 1}, class: css.speedInput})
 	onAnyChange(speedInput, () => {
 		const parsed = parseFloat(speedInput.value)
 		if(Number.isNaN(parsed) || !Number.isFinite(parsed)){
@@ -115,13 +115,13 @@ export function main(root: HTMLElement): void {
 
 
 	const addTimeBlock = tag()
-	const addTimeButton = tag({tagName: "button", text: "Add time", class: css.button})
+	const addTimeButton = tag({tag: "button", class: css.button}, ["Add time"])
 	addTimeButton.addEventListener("click", () => {
 		timeAcc += parseTime(addTimeInput.value)
 		updateText()
 	})
 	addTimeBlock.appendChild(addTimeButton)
-	const addTimeInput = tag({tagName: "input", attrs: {type: "string", value: "5:00.000"}, class: css.speedInput})
+	const addTimeInput = tag({tag: "input", attrs: {type: "string", value: "5:00.000"}, class: css.speedInput})
 	addTimeInput.addEventListener("blur", () => {
 		addTimeInput.value = formatTimeShort(parseTime(addTimeInput.value))
 	})

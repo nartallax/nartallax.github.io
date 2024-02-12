@@ -4,12 +4,11 @@ import {transformColorHsl} from "common/color_utils"
 import {performeter} from "common/perfometer"
 import {getWasmRhombusRandomiser, WasmRhombusRandomiser} from "sketches/random_rhombus_tilings/rhombus_randomizer.binding"
 import {makeBottomBarredScreenContainer} from "common/bottom_bar/bottom_bar"
-import {box, RBox, WBox} from "common/box"
+import {box, RBox, WBox} from "@nartallax/cardboard"
 import {Slider} from "common/slider/slider"
 import {TriangleGrid} from "sketches/random_rhombus_tilings/triangle_grid"
-import {getBinder} from "common/binder/binder"
-import {tag} from "common/tag"
 import {debounce} from "common/debounce"
+import {bindBox, tag} from "@nartallax/cardboard-dom"
 
 const colors = [0x53bc01, 0xffeb03, 0xffa801, 0xf93a1d, 0xe21a5f, 0x572c62, 0xa1ccd3, 0x006898] as const
 const defaultDims = {width: 10, height: 10, length: 10}
@@ -22,7 +21,7 @@ export async function main(container: HTMLElement, {isPreview}: {isPreview: bool
 	const debouncedRedraw = debounce("raf", () => redraw(props))
 
 	const steps = box(defaultSteps)
-	const maxSteps = box(steps())
+	const maxSteps = box(steps.get())
 	const props = {
 		color: box(colors[Math.floor(Math.random() * colors.length)]!),
 		seed: box(defaultSeed),
@@ -35,40 +34,34 @@ export async function main(container: HTMLElement, {isPreview}: {isPreview: bool
 
 	const update = () => {
 		debouncedRedraw()
-		maxSteps(Math.floor(TriangleGrid.getCount(props.length(), props.width(), props.height()) ** 1.5))
+		maxSteps.set(Math.floor(TriangleGrid.getCount(props.length.get(), props.width.get(), props.height.get()) ** 1.5))
 	}
 	update()
 
-	const binder = getBinder(root)
-	binder.watch(props.steps, update)
-	binder.watch(props.height, update)
-	binder.watch(props.width, update)
-	binder.watch(props.length, update)
-	binder.watch(props.seed, update)
-	binder.watch(props.color, update)
+	bindBox(root, [props.steps, props.height, props.width, props.length, props.color, props.seed], update)
 }
 
 const margins = 25
 
 const makeUpdater = (getRoot: () => HTMLElement, randomizer: WasmRhombusRandomiser) => (props: BarProps) => {
-	randomizer.seedRandom(props.seed())
+	randomizer.seedRandom(props.seed.get())
 	performeter.enterBlock("initializing")
 	const dims = {
-		height: props.height(),
-		length: props.length(),
-		width: props.width()
+		height: props.height.get(),
+		length: props.length.get(),
+		width: props.width.get()
 	}
-	console.log({...dims, steps: props.steps(), seed: props.seed()})
+	console.log({...dims, steps: props.steps.get(), seed: props.seed.get()})
 	let grid = getEmptyRhombusPattern(dims)
 
 	performeter.exitEnterBlock("randomizing")
-	const bytes = randomizer.randomizeRhombusPattern(rhombusGridToBytes(grid), props.length(), props.width(), props.height(), props.steps())
+	const bytes = randomizer.randomizeRhombusPattern(rhombusGridToBytes(grid), props.length.get(), props.width.get(), props.height.get(), props.steps.get())
 	grid = rhombusGridFromBytes(bytes, dims)
 	// tileWithRandomRhombuses(grid, props.steps())
 
 	performeter.exitEnterBlock("drawing")
 
-	const color = props.color()
+	const color = props.color.get()
 
 	const root = getRoot()
 	root.innerHTML = ""
@@ -137,15 +130,12 @@ function bottomBar(root: HTMLElement, props: BarProps): HTMLElement {
 					labelWidth
 				}),
 				tag({
-					tagName: "button",
-					text: "Refresh",
-					on: {
-						click: () => {
-							props.color(colors[Math.floor(Math.random() * colors.length)]!)
-							props.seed(Math.floor(Math.random() * 0x8fffffff))
-						}
+					tag: "button",
+					onClick: () => {
+						props.color.set(colors[Math.floor(Math.random() * colors.length)]!)
+						props.seed.set(Math.floor(Math.random() * 0x8fffffff))
 					}
-				})
+				}, ["Refresh"])
 			]),
 			Slider({
 				value: props.length,

@@ -1,4 +1,4 @@
-import {tag} from "common/tag"
+import {tag} from "@nartallax/cardboard-dom"
 import {SketchBlock} from "website/controls/sketch_block"
 import {sketchDescriptions} from "website/sketches"
 import * as css from "./main_page.module.scss"

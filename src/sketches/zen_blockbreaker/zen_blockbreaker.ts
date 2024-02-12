@@ -1,5 +1,5 @@
-import {getBinder} from "common/binder/binder"
-import {box} from "common/box"
+import {box} from "@nartallax/cardboard"
+import {bindBox} from "@nartallax/cardboard-dom"
 import {makeBottomBar} from "sketches/zen_blockbreaker/bottom_bar"
 import {ZenBlockbreaker} from "sketches/zen_blockbreaker/zen_blockbreaker_impl"
 
@@ -11,7 +11,6 @@ export function main(rootContainer: HTMLElement): void {
 	const sideCount = 4
 
 	const speed = box(initialTicksPerFrame)
-	getBinder(rootContainer).watch(speed, speed => blockbreaker.setTicksPerFrame(speed))
 
 	const stats = new Array(sideCount).fill(null).map(() => box(0))
 	const contentContainer = makeBottomBar({
@@ -36,7 +35,7 @@ export function main(rootContainer: HTMLElement): void {
 		sideCount,
 		onStatsChange: () => {
 			for(const [color, stat] of blockbreaker.stats){
-				stats[color - 1]!(stat)
+				stats[color - 1]!.set(stat)
 			}
 		},
 		colors: blockColors,
@@ -44,6 +43,7 @@ export function main(rootContainer: HTMLElement): void {
 		tailLength: 1 * initialTicksPerFrame
 	})
 	contentContainer.appendChild(blockbreaker.root)
+	bindBox(rootContainer, speed, speed => blockbreaker.setTicksPerFrame(speed))
 
 	blockbreaker.run()
 }

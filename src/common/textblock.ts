@@ -1,26 +1,22 @@
-import {box, isRBox, MaybeRBoxed} from "common/box"
+import {constBoxWrap, MRBox} from "@nartallax/cardboard"
+import {tag} from "@nartallax/cardboard-dom"
 import {rgbNumberToColorString} from "common/color_utils"
-import {tag} from "common/tag"
 
 interface Props {
-	readonly value: MaybeRBoxed<string | number>
-	readonly color?: MaybeRBoxed<string | number>
-	readonly width?: MaybeRBoxed<string | number>
-	readonly bold?: MaybeRBoxed<boolean>
-	readonly overflow?: MaybeRBoxed<"hidden" | "auto">
+	readonly value: MRBox<string | number>
+	readonly color?: MRBox<string | number>
+	readonly width?: MRBox<string | number>
+	readonly bold?: MRBox<boolean>
+	readonly overflow?: MRBox<"hidden" | "auto">
 }
 
 export const Textblock = (props: Props): HTMLElement => {
-	const color = isRBox(props.color) ? props.color : box(props.color)
-	const bold = isRBox(props.bold) ? props.bold : box(props.bold)
-	const width = isRBox(props.width) ? props.width : box(props.width)
 	return tag({
-		text: props.value,
 		style: {
-			color: color.map(color => typeof(color) === "number" ? rgbNumberToColorString(color) : color ?? ""),
-			fontWeight: bold.map(bold => bold ? "bold" : "normal"),
-			width: width.map(width => typeof(width) === "number" ? width + "px" : width ?? ""),
+			color: constBoxWrap(props.color).map(color => typeof(color) === "number" ? rgbNumberToColorString(color) : color ?? ""),
+			fontWeight: constBoxWrap(props.bold).map(bold => bold ? "bold" : "normal"),
+			width: constBoxWrap(props.width).map(width => typeof(width) === "number" ? width + "px" : width ?? ""),
 			overflow: props.overflow
 		}
-	})
+	}, [props.value])
 }

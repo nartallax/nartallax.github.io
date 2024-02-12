@@ -1,4 +1,4 @@
-import {tag} from "common/tag"
+import {tag} from "@nartallax/cardboard-dom"
 import {decodeFactorioBlueprint, encodeFactorioBlueprint, FactorioBlueprint} from "sketches/factorio_pixelart/factorio_blueprint_format"
 import * as css from "./factorio_pixelart.module.scss"
 
@@ -34,8 +34,7 @@ export function main(root: HTMLElement): void {
 	}
 
 	const el = tag({
-		class: css.blueprintStringContainer,
-		text: encodeFactorioBlueprint({blueprint})
-	})
+		class: css.blueprintStringContainer
+	}, [encodeFactorioBlueprint({blueprint})])
 	root.appendChild(el)
 }

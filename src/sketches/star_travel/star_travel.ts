@@ -1,6 +1,6 @@
+import {svgTag} from "@nartallax/cardboard-dom"
 import {cycledRequestAnimationFrame} from "common/cycled_request_animation_frame"
 import {Queue} from "common/queue"
-import {svgTag} from "common/tag"
 import {generateRandomNebula} from "./nebula_generator"
 import * as css from "./star_travel.module.scss"
 
@@ -37,7 +37,7 @@ class StarTravelController {
 	private starFlightRadius = 0
 
 	constructor(private readonly opts: StarTravelOpts) {
-		this.root = svgTag({tagName: "svg", attrs: {x: "0", y: "0"}, class: css.startravelSvg})
+		this.root = svgTag({tag: "svg", attrs: {x: "0", y: "0"}, class: css.startravelSvg})
 	}
 
 	private init(): void {
@@ -83,26 +83,24 @@ class StarTravelController {
 		const star: Star = {
 			diesAt: Date.now() + travelTime - timeOffset,
 			el: svgTag({
-				tagName: "g",
 				class: css.startravelStar,
 				attrs: {
 					transform: `translate(${this.width / 2}, ${this.height / 2}) rotate(${direction}) translate(${offsetDistance}, 0)`
 				}
 			}, [svgTag({
-				tagName: "g",
 				attrs: {
 					style: `animation-duration: ${travelTime / 1000}s;animation-delay: ${-timeOffset / 1000}s`
 				}
 			}, [
 				svgTag({
-					tagName: "path",
+					tag: "path",
 					attrs: {
 						d: `M ${-trackLength} 0 L 0 ${trackWidth / 2} A ${trackWidth / 2} ${trackWidth / 2} 0 0 0 0 ${-trackWidth / 2} z`,
 						fill: color
 					}
 				}),
 				svgTag({
-					tagName: "circle",
+					tag: "circle",
 					attrs: {
 						cx: 0,
 						cy: 0,
@@ -141,7 +139,7 @@ class StarTravelController {
 			const dy = (Math.random() - 0.5) * (this.height / 3)
 			nebula.setAttribute("transform", `translate(${(this.width / 2) + dx}, ${(this.height / 2) + dy})`)
 		}
-		return svgTag({tagName: "g", class: css.startravelBackground}, nebulae)
+		return svgTag({class: css.startravelBackground}, nebulae)
 	}
 
 }

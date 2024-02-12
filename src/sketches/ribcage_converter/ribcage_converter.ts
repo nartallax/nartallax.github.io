@@ -1,4 +1,4 @@
-import {tag} from "common/tag"
+import {tag} from "@nartallax/cardboard-dom"
 import {convertTypescriptToRibcage} from "sketches/ribcage_converter/ribcage_converter_algo"
 import {handleTabPress} from "sketches/ribcage_converter/tab_press_handling"
 import {router} from "website/routes"
@@ -7,14 +7,13 @@ import * as css from "./ribcage_converter.module.scss"
 const hashArgName = "input"
 
 export function main(root: HTMLElement): void {
-	const input = tag({tagName: "textarea", class: css.source})
+	const input = tag({tag: "textarea", class: css.source})
 	const output = tag({class: css.output})
 	const copyButton = tag({
-		tagName: "button",
-		text: "Copy",
+		tag: "button",
 		class: css.copyButton,
-		on: {click: copyResult}
-	})
+		onClick: copyResult
+	}, ["Copy"])
 	const container = tag({class: css.root}, [input, output, copyButton])
 	root.appendChild(container)
 	input.focus()

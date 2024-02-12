@@ -24,7 +24,8 @@
     "eslint": "^7.32.0",
     "parcel": "^2.8.2",
     "parcel-resolver-ts-base-url": "^1.3.1",
-    "typescript": "^4.9.4"
+    "process": "^0.11.10",
+    "typescript": "^5.3.3"
   },
   "scripts": {
     "wasm:rhombus_tilings": "cd ./src/sketches/random_rhombus_tilings/wasm/ && npx asc ./rhombus_randomizer.as.ts --outFile ./rhombus_randomiser.wasm --bindings raw --sourceMap --optimizeLevel 3 --shrinkLevel 2 --converge --noAssert && cd - > /dev/null && scripts/fix_asc_bindings.js ./src/sketches/random_rhombus_tilings/wasm/rhombus_randomiser",
@@ -46,6 +47,8 @@
     }
   },
   "dependencies": {
+    "@nartallax/cardboard": "^2.1.10",
+    "@nartallax/cardboard-dom": "^2.0.8",
     "pako": "^2.1.0",
     "three": "^0.148.0"
   }

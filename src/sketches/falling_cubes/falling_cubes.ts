@@ -1,7 +1,7 @@
 import * as THREE from "three"
 import * as OIMO from "lib/oimo"
 import orangeSquare from "./orange_square.png"
-import {getBinder} from "common/binder/binder"
+import {onResize} from "common/on_resize"
 
 function copyPos(phys: OIMO.PhysicalObjectInstance, graph: THREE.Object3D): void {
 	const q = phys.getQuaternion()
@@ -127,7 +127,7 @@ export async function main(root: HTMLElement): Promise<void> {
 	}
 
 	start()
-	getBinder(root).onResize(() => start())
+	onResize(root, () => start())
 }
 
 const sideCubeCount = 5

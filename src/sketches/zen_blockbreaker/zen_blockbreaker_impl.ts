@@ -1,6 +1,6 @@
+import {svgTag, tag} from "@nartallax/cardboard-dom"
 import {rgbNumberToColorString, transformColorHsl} from "common/color_utils"
 import {cycledRequestAnimationFrame} from "common/cycled_request_animation_frame"
-import {svgTag, tag} from "common/tag"
 import * as Matter from "lib/matterjs/matter"
 import {BallTail} from "sketches/zen_blockbreaker/ball_tail"
 
@@ -77,7 +77,7 @@ export class ZenBlockbreaker {
 	}
 
 	private makeSvgRender(): void {
-		this.svg = svgTag({tagName: "svg"})
+		this.svg = svgTag({tag: "svg"})
 		this.svg.setAttribute("width", this.params.width + "")
 		this.svg.setAttribute("height", this.params.height + "")
 		this.svg.setAttribute("viewBox", `0 0 ${this.params.width} ${this.params.height}`)
@@ -192,7 +192,7 @@ export class ZenBlockbreaker {
 
 		let block: Block = {body, color, el: null}
 		if(this.params.render === "svg"){
-			const el = svgTag({tagName: "rect",
+			const el = svgTag({tag: "rect",
 				attrs: {
 					fill: "block",
 					width: 1,
@@ -270,7 +270,7 @@ export class ZenBlockbreaker {
 			const tail = new BallTail(this.params.tailLength, tailColor)
 			this.svg!.appendChild(tail.el)
 
-			const el = svgTag({tagName: "circle", attrs: {
+			const el = svgTag({tag: "circle", attrs: {
 				cx: x, cy: y, r: 0.5, fill: colorStr
 			}})
 			this.svg!.appendChild(el)

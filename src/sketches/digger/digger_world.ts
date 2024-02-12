@@ -1,6 +1,6 @@
+import {tag} from "@nartallax/cardboard-dom"
 import {Bitmap} from "common/bitmap"
 import {RectanlgeDeduplicator} from "common/rectangle_deduplicator"
-import {tag} from "common/tag"
 
 export interface DiggerWorldOptions {
 	readonly widthCells: number
@@ -56,7 +56,7 @@ export class DiggerWorld {
 		this.terrain.setAll()
 
 		this.el = tag({
-			tagName: "canvas",
+			tag: "canvas",
 			attrs: {
 				width: options.screenWidth,
 				height: options.screenHeight

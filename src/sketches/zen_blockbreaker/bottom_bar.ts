@@ -1,8 +1,8 @@
 import {makeBottomBarredScreenContainer} from "common/bottom_bar/bottom_bar"
-import {RBox, WBox} from "common/box"
+import {RBox, WBox} from "@nartallax/cardboard"
 import {Slider} from "common/slider/slider"
-import {tag} from "common/tag"
 import {Textblock} from "common/textblock"
+import {tag} from "@nartallax/cardboard-dom"
 
 interface Props {
 	readonly speed: WBox<number>

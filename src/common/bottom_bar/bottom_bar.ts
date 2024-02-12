@@ -1,4 +1,4 @@
-import {tag} from "common/tag"
+import {tag} from "@nartallax/cardboard-dom"
 import * as css from "./bottom_bar.module.scss"
 
 interface Props {

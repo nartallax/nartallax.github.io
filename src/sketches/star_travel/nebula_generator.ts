@@ -1,4 +1,4 @@
-import {svgTag} from "common/tag"
+import {svgTag} from "@nartallax/cardboard-dom"
 import {makeBezierSmoothedClosePath} from "./bezier_smoothed_closed_path"
 import {generateWobblyCirclePoints} from "./wobbly_circle"
 
@@ -65,13 +65,13 @@ export function generateRandomNebula(radius: number): SVGElement {
 		})
 	}
 
-	return svgTag({tagName: "g"}, [
-		svgTag({tagName: "filter",
+	return svgTag({tag: "g"}, [
+		svgTag({tag: "filter",
 			attrs: {
 				id: filterName
 			}}, [
 			svgTag({
-				tagName: "feGaussianBlur",
+				tag: "feGaussianBlur",
 				attrs: {
 					in: "SourceGraphic",
 					stdDeviation: "15"
@@ -79,7 +79,7 @@ export function generateRandomNebula(radius: number): SVGElement {
 			})
 		]),
 		svgTag({
-			tagName: "g",
+			tag: "g",
 			attrs: {
 				filter: `url(#${filterName})`
 			}

@@ -39,7 +39,7 @@ export class Router<R extends string> {
 	}
 
 	goTo(route: R, args?: RouteArgs): void {
-		this.hashBox(this.formHash(route, args ?? {}))
+		this.hashBox.set(this.formHash(route, args ?? {}))
 	}
 
 	getArgument(name: string): RouteArgumentValue | undefined {
@@ -53,18 +53,18 @@ export class Router<R extends string> {
 		} else {
 			newArgs[name] = value
 		}
-		this.hashBox(this.formHash(this.currentRoute, newArgs))
+		this.hashBox.set(this.formHash(this.currentRoute, newArgs))
 	}
 
 	private checkHash(alwaysRender = false): void {
-		const [route, args] = this.parseHash(this.hashBox())
+		const [route, args] = this.parseHash(this.hashBox.get())
 		if(route === this.currentRoute && !alwaysRender){
 			return // just a change in arguments, no reason to panic
 		}
 
 		const description = this.routes[route]
 		if(!description){
-			this.hashBox(this.defaultRoute)
+			this.hashBox.set(this.defaultRoute)
 			return
 		}
 
@@ -113,7 +113,7 @@ export class Router<R extends string> {
 			this.root.firstChild.remove()
 		}
 		this.root.appendChild(render())
-		this.titleBox(title)
+		this.titleBox.set(title)
 	}
 
 }

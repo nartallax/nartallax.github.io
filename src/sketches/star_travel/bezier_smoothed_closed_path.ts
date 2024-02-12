@@ -1,4 +1,4 @@
-import {svgTag} from "common/tag"
+import {svgTag} from "@nartallax/cardboard-dom"
 import {Point} from "sketches/star_travel/wobbly_circle"
 
 /** Имея массив точек, сделать из него сглаженный path  */
@@ -19,7 +19,7 @@ export function makeBezierSmoothedClosePath(vertex: Point[], smoothness: number)
 		pathStr += `C ${prevBezier.x} ${prevBezier.y}, ${curBezier.x} ${curBezier.y}, ${cur.x} ${cur.y}`
 	}
 
-	return svgTag({tagName: "path", attrs: {d: pathStr}})
+	return svgTag({tag: "path", attrs: {d: pathStr}})
 }
 
 function calcBezierPoint(cur: Point, prev: Point, next: Point, firstPoint: boolean, smoothness: number): Point {

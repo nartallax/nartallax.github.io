@@ -1,10 +1,10 @@
 import * as THREE from "three"
 import {waitDOMEvent} from "common/wait_dom_event"
-import {tag} from "common/tag"
 import * as css from "./squaremix_3d.module.scss"
-import {getBinder} from "common/binder/binder"
 import image from "./pine_forest.png"
 import {debounce} from "common/debounce"
+import {onResize} from "common/on_resize"
+import {tag} from "@nartallax/cardboard-dom"
 
 const imageWidth = 1920
 const imageHeight = 1080
@@ -21,7 +21,7 @@ async function init(root: HTMLElement): Promise<void> {
 		img.remove()
 		img = null
 	}
-	img = tag({tagName: "img", attrs: {src: image}, class: css.initialImage})
+	img = tag({tag: "img", attrs: {src: image}, class: css.initialImage})
 	if(bodyRect.width / bodyRect.height > imageWidth / imageHeight){
 		img.style.maxWidth = "100vw"
 	} else {
@@ -81,9 +81,9 @@ async function init(root: HTMLElement): Promise<void> {
 }
 
 export function main(root: HTMLElement): void {
-	init(root)
-
-	getBinder(root).onResize(debounce(250, () => init(root)))
+	const debouncedInit = debounce(100, () => init(root))
+	debouncedInit()
+	onResize(root, debouncedInit)
 }
 
 class TransformAction {

@@ -1,4 +1,4 @@
-import {tag} from "common/tag"
+import {tag} from "@nartallax/cardboard-dom"
 import {SketchInfoButton} from "website/controls/sketch_info_button"
 import {router} from "website/routes"
 import {SketchDescription} from "website/sketches"

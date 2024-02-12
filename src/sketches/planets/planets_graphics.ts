@@ -1,5 +1,5 @@
-import {getBinder} from "common/binder/binder"
-import {svgTag} from "common/tag"
+import {svgTag} from "@nartallax/cardboard-dom"
+import {onResize} from "common/on_resize"
 import {PlanetSimulationBody, PlanetsSimulation} from "sketches/planets/planets_simulation"
 
 interface BodyInternalProps {
@@ -23,10 +23,10 @@ export class PlanetsSimulationWithGraphics {
 
 	constructor(root: HTMLElement, private readonly zoom: number) {
 		this.simulation = new PlanetsSimulation()
-		this.svg = svgTag({tagName: "svg"})
+		this.svg = svgTag({tag: "svg"})
 		root.appendChild(this.svg)
 		this.updateSvgSize()
-		getBinder(root).onResize(() => this.updateSvgSize())
+		onResize(root, () => this.updateSvgSize())
 	}
 
 	private updateSvgSize(): void {
@@ -42,7 +42,7 @@ export class PlanetsSimulationWithGraphics {
 	}
 
 	private makeBodyElement(base: Omit<BodyBase, "x" | "y" | "xSpeed" | "ySpeed">): SVGCircleElement {
-		const el = svgTag({tagName: "circle", attrs: {
+		const el = svgTag({tag: "circle", attrs: {
 			cx: 0, cy: 0, r: base.radius, fill: base.color, stroke: base.outline, "stroke-width": 3
 		}})
 		this.svg.appendChild(el)

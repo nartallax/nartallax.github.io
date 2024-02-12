@@ -1,4 +1,4 @@
-import {box, WBox} from "common/box"
+import {box, WBox} from "@nartallax/cardboard"
 
 let locationHashBox: WBox<string> | null = null
 
@@ -6,7 +6,7 @@ export function getLocationHashBox(): WBox<string> {
 	if(!locationHashBox){
 		const b = locationHashBox = box(fixHash(window.location.hash))
 
-		window.addEventListener("hashchange", () => b(fixHash(window.location.hash)))
+		window.addEventListener("hashchange", () => b.set(fixHash(window.location.hash)))
 		b.subscribe(value => {
 			if(value === ""){
 				if(window.location.hash && typeof(history) !== "undefined"){

@@ -1,4 +1,4 @@
-import {tag} from "common/tag"
+import {tag} from "@nartallax/cardboard-dom"
 import {waitDOMEvent} from "common/wait_dom_event"
 import {CountdownTimer} from "website/controls/countdown_timer"
 import {noSketchInfoOnSketchPageArgName} from "website/controls/sketch_page"
@@ -9,15 +9,15 @@ import * as css from "./sketch_block.module.scss"
 export function SketchBlock(sketch: SketchDescription): HTMLElement {
 
 	const imgContainer = tag({class: css.imgContainer}, [
-		tag({tagName: "img", attrs: {src: sketch.thumbnail, alt: sketch.description}})
+		tag({tag: "img", attrs: {src: sketch.thumbnail, alt: sketch.description}})
 	])
 
 	const root = tag({
 		class: css.sketch,
-		on: {click: () => router.goTo(sketchRouteById(sketch.id))}
+		onClick: () => router.goTo(sketchRouteById(sketch.id))
 	}, [
 		imgContainer,
-		tag({class: css.sketchTitle, text: sketch.name})
+		tag({class: css.sketchTitle}, [sketch.name])
 	])
 
 	let timer: Timer | null = null
@@ -66,7 +66,7 @@ function runSketchTimer(sketch: SketchDescription, container: HTMLElement, time:
 
 		const url = router.formRouteURL(sketchRouteById(sketch.id), {[noSketchInfoOnSketchPageArgName]: true})
 		sketchFrame = tag({
-			tagName: "iframe",
+			tag: "iframe",
 			class: css.sketchPreview,
 			attrs: {src: url}
 		})

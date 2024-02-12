@@ -1,5 +1,4 @@
 import {performeter} from "common/perfometer"
-import {tag} from "common/tag"
 import {ColorArrayDisplay} from "sketches/wave_function_collapse/color_array_display"
 import {PatternInput} from "sketches/wave_function_collapse/pattern_input"
 import {waveFunctionCollapse} from "sketches/wave_function_collapse/wave_function_collapse_algo"
@@ -7,6 +6,7 @@ import * as css from "./wave_function_collapse.module.scss"
 import * as testResult from "./test_result.json"
 // import * as islandsSource from "./island_source.json"
 import * as islandsSource from "./island_small_source.json"
+import {tag} from "@nartallax/cardboard-dom"
 
 export function main(root: HTMLElement): void {
 	const patternInput = new PatternInput<number>({
@@ -24,7 +24,7 @@ export function main(root: HTMLElement): void {
 	}, [
 		tag([
 			patternInput.root,
-			tag({tagName: "button", text: "Collapse!", on: {click: run}})
+			tag({tag: "button", onClick: run}, ["Collapse!"])
 		]),
 		display.root
 	]))

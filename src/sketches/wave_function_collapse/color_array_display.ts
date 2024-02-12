@@ -1,5 +1,5 @@
+import {tag} from "@nartallax/cardboard-dom"
 import {rgbNumberToColorString} from "common/color_utils"
-import {tag} from "common/tag"
 
 export class ColorArrayDisplay {
 
@@ -7,7 +7,7 @@ export class ColorArrayDisplay {
 	private readonly context: CanvasRenderingContext2D
 
 	constructor(readonly scale: number) {
-		const canvas = tag({tagName: "canvas"})
+		const canvas = tag({tag: "canvas"})
 		this.root = canvas
 
 		const context = canvas.getContext("2d")

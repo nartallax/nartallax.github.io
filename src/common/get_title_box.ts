@@ -1,4 +1,4 @@
-import {box, WBox} from "common/box"
+import {box, WBox} from "@nartallax/cardboard"
 
 let titleBox: WBox<string> | null = null
 

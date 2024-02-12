@@ -1,6 +1,6 @@
+import {tag} from "@nartallax/cardboard-dom"
 import {rgbNumberToColorString} from "common/color_utils"
 import {addCursorMoveHandler, pointerEventsToOffsetCoords, preventContextMenu} from "common/input_utils"
-import {tag} from "common/tag"
 import {ColorArrayDisplay} from "sketches/wave_function_collapse/color_array_display"
 import * as css from "./wave_function_collapse.module.scss"
 
@@ -46,14 +46,12 @@ export class PatternInput<T extends number = number> {
 		const paletteButtons = params.palette.map(color => {
 			const button: HTMLElement = tag({
 				class: css["pattern-input-palette-item"],
-				on: {
-					click: () => {
-						this.primaryCb = this.selectColor(this.primaryCb, button, color)
-					}
-					// contextmenu: () => {
-					// 	this.secondaryCb = this.selectColor(this.secondaryCb, button, color)
-					// }
+				onClick: () => {
+					this.primaryCb = this.selectColor(this.primaryCb, button, color)
 				},
+				// onContextmenu: () => {
+				// 	this.secondaryCb = this.selectColor(this.secondaryCb, button, color)
+				// }
 				style: {
 					backgroundColor: rgbNumberToColorString(color)
 				}

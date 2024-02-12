@@ -1,4 +1,4 @@
-import {svgTag} from "common/tag"
+import {svgTag} from "@nartallax/cardboard-dom"
 import {TimedQueue} from "common/timed_queue"
 
 interface Point {
@@ -12,7 +12,7 @@ export class BallTail {
 	readonly el: SVGPathElement
 
 	constructor(private readonly timeLimit: number, color: string) {
-		this.el = svgTag({tagName: "path", attrs: {stroke: "none", fill: color, "stroke-width": "0.01"}})
+		this.el = svgTag({tag: "path", attrs: {stroke: "none", fill: color, "stroke-width": "0.01"}})
 	}
 
 	private addPoint(time: number, x: number, y: number): void {
