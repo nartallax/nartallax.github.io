@@ -8,6 +8,7 @@ import particleToyThumb from "sketches/particle_toy/thumb.png"
 import waveFunctionCollapseThumb from "sketches/wave_function_collapse/thumb.png"
 import zenBlockbreakerThumb from "sketches/zen_blockbreaker/thumb.png"
 import randomRhombusTilingsThumb from "sketches/random_rhombus_tilings/thumb.png"
+import dungeonMapperThumb from "sketches/dungeon_mapper/thumb.png"
 import notImplementedThumb from "./default_thumbnail.png"
 
 export interface SketchDescription {
@@ -181,6 +182,16 @@ const _sketches = {
 			description: "Youtube video about this type of tilings. Was curious if it really will converge to a circle when generated as described in the video.",
 			url: "https://www.youtube.com/watch?v=c6J_bd9seMg"
 		}]
+	},
+
+	dungeon_mapper: {
+		name: "Dungeon mapper",
+		description: "Simple generator of 2d dungeon maps.",
+		date: new Date(2024, 8, 22),
+		tags: [],
+		code: () => import("sketches/dungeon_mapper/dungeon_mapper"),
+		thumbnail: dungeonMapperThumb,
+		hidden: true
 	}
 } satisfies Record<string, Omit<SketchDescription, "id">>
 

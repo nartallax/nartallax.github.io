@@ -1,4 +1,0 @@
-User-Agent: *
-
-Sitemap: https://nartallax.github.io/sitemap.xml
-Host: https://nartallax.github.io
