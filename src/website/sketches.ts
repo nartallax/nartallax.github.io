@@ -192,6 +192,17 @@ const _sketches = {
 		code: () => import("sketches/dungeon_mapper/dungeon_mapper"),
 		thumbnail: dungeonMapperThumb,
 		hidden: true
+	},
+
+	fp_determinism_tester: {
+		name: "FP determinism tester",
+		description: "A small suite of tests to check if floating-point operations are deterministic on your setup.",
+		date: new Date(2024, 9, 16),
+		tags: [contentTags.tool],
+		code: () => import("sketches/fp_determinism_tester/fp_determinism_tester"),
+		thumbnail: notImplementedThumb,
+		hidden: true,
+		infoButtonPosition: "topRight"
 	}
 } satisfies Record<string, Omit<SketchDescription, "id">>
 

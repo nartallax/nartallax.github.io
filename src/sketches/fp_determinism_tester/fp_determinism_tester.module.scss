@@ -1,0 +1,43 @@
+.button,
+.buttonSmall {
+  cursor: pointer;
+  border-radius: 8px;
+  background-color: #222;
+  color: #aaa;
+}
+
+.button {
+  position: absolute;
+  left: 5vw;
+  right: 5vw;
+  top: 5vh;
+  padding: 1rem;
+  font-size: 40px;
+}
+
+.buttonSmall {
+  width: 90vw;
+  margin: 1rem 5vw;
+  padding: 0.5rem;
+}
+
+.table {
+  color: #aaa;
+  border-spacing: 0;
+  border-collapse: collapse;
+  margin: auto;
+
+  th {
+    background-color: #444;
+    border: 1px solid #555;
+    font-weight: bold;
+    padding: 2px;
+  }
+
+  td {
+    background-color: #222;
+    border: 1px solid #555;
+    text-align: left;
+    padding: 2px 4px;
+  }
+}
