@@ -1,20 +1,28 @@
-import {tag} from "@nartallax/cardboard-dom"
+import {svgTag, tag} from "@nartallax/cardboard-dom"
 import inputDataPath from "./input_data.txt"
 import * as css from "./fp_determinism_tester.module.scss"
+import {getCatmullRomSvgPathForDotSequence} from "sketches/fp_determinism_tester/catmull-rom"
+import {PerlinNoiseGenerator} from "sketches/fp_determinism_tester/perlin_noise"
+import {cos, sin} from "sketches/fp_determinism_tester/trigonometry"
 
-const runTheTests = (testData: number[]): FullTestRunResult[] => {
-	const [o1, o2, o3, o4, negZero] = testData as any
+const runTheTests = (testData: any): FullTestRunResult[] => {
+	const {numbers: [o1, o2, o3, o4, negZero], catmullRom} = testData
 	return runTests([
 		["0.1 + 0.2", x => x + o1 + o2],
 		["0.1 - 0.2", x => x + o1 - o2],
 		["0.1 * 0.2", x => x + o1 * o2],
-		["0.1 / 0.2", x => x + o1 * o2],
+		["0.1 / 0.2", x => x + o1 / o2],
 		["(0.1 * 0.2) + (0.3 * 0.4)", x => x + (o1 * o2) + (o3 * o4)],
-		["sin(0.1) + cos(0.2)", x => x + Math.sin(o1) + Math.cos(o2)],
+		["M.sin(0.1) + M.cos(0.2)", x => x + Math.sin(o1) + Math.cos(o2)],
+		["sin(0.1) + cos(0.2)", x => x + sin(o1) + cos(o2)],
 		["sqrt(0.3) + sqrt(0.4)", x => x + Math.sqrt(o3) + Math.sqrt(o4)],
 		["-0", () => negZero],
 		["-0 + -0", () => negZero + negZero],
-		["-0 + 0.1 - 0.1", x => x + negZero + o1 - o1]
+		["-0 + 0.1 - 0.1", x => x + negZero + o1 - o1],
+		["Catmull-Rom curves", x => x + getCatmullRomSvgPathForDotSequence(catmullRom)
+			.map(x => typeof(x) === "string" ? 1 : x)
+			.reduce((a, b) => a * b, 1)],
+		["Perlin noise", x => x + calcPerlinNoiseChecksum(testData)]
 	])
 }
 
@@ -34,6 +42,8 @@ export async function main(root: HTMLElement): Promise<void> {
 				const table = makeResultsTable(testResults)
 				btn.replaceWith(table)
 				root.prepend(makeCopyButton(testResults))
+
+				root.prepend(renderVisualStuff(data))
 			} catch(e){
 				console.error(e)
 				btn.textContent = "Something failed! Whoopsie. See console output."
@@ -47,6 +57,7 @@ export async function main(root: HTMLElement): Promise<void> {
 	// storing this behind network request to avoid static code optimization
 	const data = await(await fetch(inputDataPath)).json()
 	btn.textContent = "Run the tests!"
+	// root.prepend(renderVisualStuff(data))
 }
 
 type Test = [
@@ -102,10 +113,7 @@ const makeResultsTable = (data: FullTestRunResult[]): HTMLElement => {
 
 const runTests = (tests: Test[]): FullTestRunResult[] => {
 	const coldTimings = makeTimings(tests)
-	let coldResults: ShortTestRunResult[]
-	for(let i = 0; i < 5; i++){
-		coldResults = runRoundOfTests(tests, coldTimings)
-	}
+	const coldResults = runRoundOfTests(tests, coldTimings)
 
 	const throwawayTimings = makeTimings(tests)
 	const now = Date.now()
@@ -114,14 +122,10 @@ const runTests = (tests: Test[]): FullTestRunResult[] => {
 	}
 
 	const hotTimings = makeTimings(tests)
-	let hotResults: ShortTestRunResult[]
-	for(let i = 0; i < 5; i++){
-		hotResults = runRoundOfTests(tests, hotTimings)
-	}
+	const hotResults = runRoundOfTests(tests, hotTimings)
 
-
-	const enrichedCold = enrichWithTiming(coldResults!, coldTimings, "(c) ")
-	const enrichedHot = enrichWithTiming(hotResults!, hotTimings, "(h) ")
+	const enrichedCold = enrichWithTiming(coldResults, coldTimings, "(c) ")
+	const enrichedHot = enrichWithTiming(hotResults, hotTimings, "(h) ")
 
 	return insertAtEachNth(enrichedHot, enrichedCold, 2)
 
@@ -175,4 +179,55 @@ const runRoundOfTests = (tests: Test[], timing: TestTiming[]): ShortTestRunResul
 		result.push({name: test[0], dec: testResultDec, bin: testResultBin})
 	}
 	return result
+}
+
+const renderVisualStuff = (data: any): HTMLElement => {
+	const catmullRomPath = getCatmullRomSvgPathForDotSequence(data.catmullRom).join(" ")
+	return tag({class: css.stuffDisplay}, [
+		renderSvgPath(catmullRomPath),
+		renderPerlinGrid(data)
+	])
+}
+
+const perlinOffset = -5
+const perlinSize = 10
+const perlinResolution = 5
+
+const renderPerlinGrid = (data: any): HTMLElement => {
+	const pixelSize = 20
+	const canvas = tag({tag: "canvas", attrs: {width: perlinSize * pixelSize, height: perlinSize * pixelSize}})
+	const ctx = canvas.getContext("2d")!
+	const gen = new PerlinNoiseGenerator(data.perlinSeed, data.pi)
+	for(let x = perlinOffset; x < perlinOffset + perlinSize; x++){
+		for(let y = perlinOffset; y < perlinOffset + perlinSize; y++){
+			const noise = Math.floor((gen.get((x + 0.5) / perlinResolution, (y + 0.5) / perlinResolution) + 1) * 128)
+			let noiseColor = noise.toString(16)
+			if(noiseColor.length < 2){
+				noiseColor = "0" + noiseColor
+			}
+			noiseColor = `#${noiseColor}${noiseColor}${noiseColor}`
+			ctx.fillStyle = noiseColor
+			ctx.fillRect((x - perlinOffset) * pixelSize, (y - perlinOffset) * pixelSize, pixelSize, pixelSize)
+		}
+	}
+	return canvas
+}
+
+const calcPerlinNoiseChecksum = (data: any): number => {
+	let sum = 0
+	const gen = new PerlinNoiseGenerator(data.perlinSeed, data.pi)
+	for(let x = perlinOffset; x < perlinOffset + perlinSize; x++){
+		for(let y = perlinOffset; y < perlinOffset + perlinSize; y++){
+			sum += gen.get((x + 0.5) / perlinResolution, (y + 0.5) / perlinResolution)
+		}
+	}
+	return sum
+}
+
+const renderSvgPath = (path: string) => {
+	const svg = svgTag({tag: "svg"}, [
+		svgTag({tag: "path", attrs: {d: path}})
+	])
+	svg.setAttribute("viewBox", "-1 -1 100 100")
+	return svg
 }

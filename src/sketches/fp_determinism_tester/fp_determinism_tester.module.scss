@@ -4,6 +4,7 @@
   border-radius: 8px;
   background-color: #222;
   color: #aaa;
+  z-index: 1;
 }
 
 .button {
@@ -26,6 +27,7 @@
   border-spacing: 0;
   border-collapse: collapse;
   margin: auto;
+  z-index: 2;
 
   th {
     background-color: #444;
@@ -39,5 +41,31 @@
     border: 1px solid #555;
     text-align: left;
     padding: 2px 4px;
+  }
+}
+
+.stuffDisplay {
+  opacity: 0.5;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 200px;
+  > * {
+    width: 200px;
+  }
+  pointer-events: none;
+  z-index: 1;
+
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+}
+
+svg {
+  path {
+    fill: #666;
+    stroke: #888;
+    stroke-width: 2;
   }
 }
