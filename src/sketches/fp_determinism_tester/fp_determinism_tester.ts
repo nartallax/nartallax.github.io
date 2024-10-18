@@ -16,7 +16,6 @@ const runTheTests = (testData: any): FullTestRunResult[] => {
 		["M.sin(0.1) + M.cos(0.2)", x => x + Math.sin(o1) + Math.cos(o2)],
 		["sin(0.1) + cos(0.2)", x => x + sin(o1) + cos(o2)],
 		["sqrt(0.3) + sqrt(0.4)", x => x + Math.sqrt(o3) + Math.sqrt(o4)],
-		["-0", () => negZero],
 		["-0 + -0", () => negZero + negZero],
 		["-0 + 0.1 - 0.1", x => x + negZero + o1 - o1],
 		["Catmull-Rom curves", x => x + getCatmullRomSvgPathForDotSequence(catmullRom)
@@ -82,8 +81,8 @@ const makeCopyButton = (testResults: FullTestRunResult[]) => tag({
 	class: css.buttonSmall,
 	onClick: () => {
 		const arrs = testResults.map(({
-			name, dec, bin, time
-		}) => [name, dec, bin, time])
+			name, bin
+		}) => [name, bin])
 		void navigator.clipboard.writeText(JSON.stringify(arrs)
 			.replaceAll(/\],\[/g, "],\n[")
 			.replaceAll(/\[\[/g, "[\n[")
