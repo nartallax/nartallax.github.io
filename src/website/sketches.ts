@@ -203,6 +203,17 @@ const _sketches = {
 		thumbnail: notImplementedThumb,
 		hidden: true,
 		infoButtonPosition: "topRight"
+	},
+
+	embedding_with_localstorage: {
+		name: "Localstorage test",
+		description: "This page uses local storage. This meant to test if it's viable to use localstorage in iframe.",
+		date: new Date(2024, 9, 16),
+		tags: [contentTags.tool],
+		code: () => import("sketches/embedding_with_localstorage/embedding_with_localstorage"),
+		thumbnail: notImplementedThumb,
+		hidden: true,
+		infoButtonPosition: "topRight"
 	}
 } satisfies Record<string, Omit<SketchDescription, "id">>
 
