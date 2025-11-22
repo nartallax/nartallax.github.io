@@ -9,6 +9,7 @@ import waveFunctionCollapseThumb from "sketches/wave_function_collapse/thumb.png
 import zenBlockbreakerThumb from "sketches/zen_blockbreaker/thumb.png"
 import randomRhombusTilingsThumb from "sketches/random_rhombus_tilings/thumb.png"
 import dungeonMapperThumb from "sketches/dungeon_mapper/thumb.png"
+import wheelClockThumb from "sketches/wheel_clock/thumb.png"
 import notImplementedThumb from "./default_thumbnail.png"
 
 export interface SketchDescription {
@@ -213,6 +214,16 @@ const _sketches = {
 		code: () => import("sketches/embedding_with_localstorage/embedding_with_localstorage"),
 		thumbnail: notImplementedThumb,
 		hidden: true,
+		infoButtonPosition: "topRight"
+	},
+
+	wheel_clock: {
+		name: "Wheel Clock",
+		description: "A nice clock that displays current time.",
+		date: new Date(2025, 10, 22),
+		tags: [contentTags.tool, contentTags.art],
+		code: () => import("sketches/wheel_clock/wheel_clock"),
+		thumbnail: wheelClockThumb,
 		infoButtonPosition: "topRight"
 	}
 } satisfies Record<string, Omit<SketchDescription, "id">>
